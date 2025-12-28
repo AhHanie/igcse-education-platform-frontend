@@ -1,13 +1,16 @@
 import React from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu } from "lucide-react";
+import { Menu, Moon, Sun } from "lucide-react";
+import { useThemeMode } from "@/hooks/useThemeMode";
 
 interface MainLayoutProps {
   children: React.ReactNode;
 }
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
+  const { mode, toggleMode } = useThemeMode();
+
   return (
     <div className="flex min-h-screen flex-col">
       <header className="border-b bg-background">
@@ -27,6 +30,19 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
           >
             About
           </Link>
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleMode}
+            className="ml-4"
+            aria-label="Toggle theme"
+          >
+            {mode === "dark" ? (
+              <Sun className="h-5 w-5" />
+            ) : (
+              <Moon className="h-5 w-5" />
+            )}
+          </Button>
         </div>
       </header>
 
