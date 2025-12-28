@@ -158,7 +158,7 @@ export function SignupForm({
               <Input
                 id="school-code"
                 type="text"
-                placeholder="Enter your school code"
+                placeholder="Enter your school codeee"
                 value={schoolCode}
                 onChange={(e) => {
                   setSchoolCode(e.target.value);
