@@ -1,11 +1,11 @@
 import React from "react";
-import { Box, CircularProgress } from "@mui/material";
+import { Spinner } from "@/components/common/spinner";
 
 const LoadingSpinner: React.FC = () => {
   return (
-    <Box sx={{ display: "flex", justifyContent: "center", py: 4 }}>
-      <CircularProgress />
-    </Box>
+    <div className="flex justify-center py-16">
+      <Spinner size="lg" />
+    </div>
   );
 };
 

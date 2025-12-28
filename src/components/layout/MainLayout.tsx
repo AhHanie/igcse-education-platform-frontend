@@ -1,14 +1,7 @@
 import React from "react";
-import {
-  AppBar,
-  Toolbar,
-  Typography,
-  Container,
-  Box,
-  IconButton,
-} from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import { Link as RouterLink } from "react-router-dom";
+import { Link } from "react-router-dom";
+import { Button } from "@/components/common/button";
+import { Menu } from "lucide-react";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -16,38 +9,35 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   return (
-    <Box sx={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
-      <AppBar position="static">
-        <Toolbar>
-          <IconButton edge="start" color="inherit" sx={{ mr: 2 }}>
-            <MenuIcon />
-          </IconButton>
-          <Typography
-            variant="h6"
-            component={RouterLink}
+    <div className="flex min-h-screen flex-col">
+      <header className="border-b bg-background">
+        <div className="container mx-auto flex h-16 items-center px-4">
+          <Button variant="ghost" size="icon" className="mr-2">
+            <Menu className="h-5 w-5" />
+          </Button>
+          <Link
             to="/"
-            sx={{ flexGrow: 1, color: "inherit", textDecoration: "none" }}
+            className="flex-1 text-lg font-semibold text-foreground no-underline hover:underline"
           >
             My Vite React App
-          </Typography>
-          <Typography
-            component={RouterLink}
+          </Link>
+          <Link
             to="/about"
-            sx={{ color: "inherit", textDecoration: "none", ml: 2 }}
+            className="ml-4 text-sm text-foreground/80 no-underline hover:text-foreground hover:underline"
           >
             About
-          </Typography>
-        </Toolbar>
-      </AppBar>
+          </Link>
+        </div>
+      </header>
 
-      <Container sx={{ flex: 1, py: 3 }}>{children}</Container>
+      <main className="container mx-auto flex-1 px-4 py-6">{children}</main>
 
-      <Box component="footer" sx={{ py: 2, textAlign: "center" }}>
-        <Typography variant="body2" color="text.secondary">
+      <footer className="border-t bg-background py-4 text-center">
+        <p className="text-sm text-muted-foreground">
           © {new Date().getFullYear()} My App
-        </Typography>
-      </Box>
-    </Box>
+        </p>
+      </footer>
+    </div>
   );
 };
 

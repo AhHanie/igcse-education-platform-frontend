@@ -1,22 +1,18 @@
 import React from "react";
-import { Typography, Stack, Button } from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import { Button } from "@/components/common/button";
 
 const NotFoundPage: React.FC = () => {
   const navigate = useNavigate();
 
   return (
-    <Stack spacing={2} alignItems="flex-start">
-      <Typography variant="h4" component="h1">
-        404 - Page Not Found
-      </Typography>
-      <Typography variant="body1">
+    <div className="flex flex-col items-start space-y-4">
+      <h1 className="text-3xl font-bold">404 - Page Not Found</h1>
+      <p className="text-base text-foreground">
         The page you are looking for does not exist.
-      </Typography>
-      <Button variant="contained" onClick={() => navigate("/")}>
-        Go Home
-      </Button>
-    </Stack>
+      </p>
+      <Button onClick={() => navigate("/")}>Go Home</Button>
+    </div>
   );
 };
 

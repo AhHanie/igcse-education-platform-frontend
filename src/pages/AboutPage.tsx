@@ -1,17 +1,14 @@
 import React from "react";
-import { Typography, Stack } from "@mui/material";
 
 const AboutPage: React.FC = () => {
   return (
-    <Stack spacing={2}>
-      <Typography variant="h4" component="h1">
-        About
-      </Typography>
-      <Typography variant="body1">
+    <div className="space-y-4">
+      <h1 className="text-3xl font-bold">About</h1>
+      <p className="text-base text-foreground">
         This project is built with Vite, React, TypeScript, React Router,
-        Zustand, and Material UI.
-      </Typography>
-    </Stack>
+        Zustand, and shadcn/ui.
+      </p>
+    </div>
   );
 };
 

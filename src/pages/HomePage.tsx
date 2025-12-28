@@ -1,17 +1,14 @@
 import React from "react";
-import { Typography, Stack } from "@mui/material";
 
 const HomePage: React.FC = () => {
   return (
-    <Stack spacing={3}>
-      <Typography variant="h4" component="h1">
-        Home
-      </Typography>
-      <Typography variant="body1">
+    <div className="space-y-6">
+      <h1 className="text-3xl font-bold">Home</h1>
+      <p className="text-base text-foreground">
         This is the home page. Below is a simple counter implemented with
-        Zustand and Material UI.
-      </Typography>
-    </Stack>
+        Zustand and shadcn/ui.
+      </p>
+    </div>
   );
 };
 
