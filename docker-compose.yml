@@ -1,0 +1,26 @@
+name: igcse-frontend-dev
+
+services:
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: igcse-frontend
+    env_file:
+      - .env
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    environment:
+      VITE_API_BASE_URL: "${VITE_API_BASE_URL:-http://localhost:8000}"
+      # Force file watching to use polling (common requirement on Windows + Docker)
+      CHOKIDAR_USEPOLLING: "true"
+      CHOKIDAR_INTERVAL: "200"
+    volumes:
+      - ./src:/app/src
+    networks:
+      - igcse-net
+
+networks:
+  igcse-net:
+    name: igcse-net
+    driver: bridge
