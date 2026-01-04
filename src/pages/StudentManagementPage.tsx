@@ -5,24 +5,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heading } from "@/components/ui/typography";
 import { Separator } from "@/components/ui/separator";
 import { PaginatedTable } from "@/components/ui/paginated-table";
-
 import { AddStudentModal } from "@/features/student/components/AddStudentModal";
-
-type User = {
-  id: string;
-  organization_id: string;
-  school_id: string;
-  username: string;
-  email: string | null;
-  display_name: string;
-  gender: 0 | 1;
-  is_active: boolean;
-  must_reset: boolean;
-  last_active_at: string | null;
-  created_at: string;
-  updated_at: string | null;
-  student_code: string;
-};
+import type { User } from "@/types/common";
 
 // TODO: Remove hardcoding once authentication is implemented on frontend side
 const SCHOOL_SHORT_NAME = "school";
