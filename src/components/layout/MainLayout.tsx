@@ -1,8 +1,10 @@
 import React from "react";
-import { Link } from "react-router-dom";
+// import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
-import { Menu, Moon, Sun } from "lucide-react";
+import { Moon, Sun } from "lucide-react";
 import { useThemeMode } from "@/hooks/useThemeMode";
+import  Sidebar  from "../sideBar";
+import "@/assets/css/App.css";
 
 interface MainLayoutProps {
   children: React.ReactNode;
@@ -12,24 +14,14 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { mode, toggleMode } = useThemeMode();
 
   return (
-    <div className="flex min-h-screen flex-col">
-      <header className="border-b bg-background">
-        <div className="container mx-auto flex h-16 items-center px-4">
-          <Button variant="ghost" size="icon" className="mr-2">
-            <Menu className="h-5 w-5" />
-          </Button>
-          <Link
-            to="/"
-            className="flex-1 text-lg font-semibold text-foreground no-underline hover:underline"
-          >
-            My Vite React App
-          </Link>
-          <Link
-            to="/about"
-            className="ml-4 text-sm text-foreground/80 no-underline hover:text-foreground hover:underline"
-          >
-            About
-          </Link>
+    <div className=" min-h-screen flex">
+      <Sidebar open={true} onClose={() => {}} />
+      <div className="flex flex-col w-full main">
+      <nav className="header">
+        <div>
+        <h1>Welcome back, Omar! 👋</h1>
+        <p>Ready to continue your learning journey?</p>
+        </div>
           <Button
             variant="ghost"
             size="icon"
@@ -43,16 +35,16 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
               <Moon className="h-5 w-5" />
             )}
           </Button>
-        </div>
-      </header>
+      </nav>
 
-      <main className="container mx-auto flex-1 px-4 py-6">{children}</main>
+      <main className="content">{children}</main>
+      </div>
 
-      <footer className="border-t bg-background py-4 text-center">
+      {/* <footer className="border-t bg-background py-4 text-center">
         <p className="text-sm text-muted-foreground">
           © {new Date().getFullYear()} My App
         </p>
-      </footer>
+      </footer> */}
     </div>
   );
 };
