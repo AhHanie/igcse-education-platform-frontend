@@ -1,10 +1,16 @@
 const BASE_URL = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
 
 export interface ApiRequestOptions
-  extends Omit<RequestInit, "body" | "headers"> {
+  extends Omit<RequestInit, "body" | "headers" | "credentials"> {
   headers?: Record<string, string>;
   body?: unknown;
   manualErrorHandling?: boolean;
+
+  /**
+   * Defaults to "include" so HTTP-only auth cookies are sent.
+   * Override per-request if needed.
+   */
+  credentials?: RequestCredentials;
 }
 
 export class ApiError extends Error {
@@ -25,11 +31,6 @@ const defaultErrorHandler = (error: ApiError) => {
     status: error.status,
     payload: error.payload,
   });
-};
-
-const getToken = () => {
-  if (typeof window === "undefined") return null;
-  return localStorage.getItem("jwt");
 };
 
 const buildUrl = (path: string) => {
@@ -61,9 +62,7 @@ const parseResponse = async (response: Response) => {
   const contentType = response.headers.get("content-type");
   const isJson = contentType?.includes("application/json");
 
-  if (isJson) {
-    return response.json();
-  }
+  if (isJson) return response.json();
 
   const text = await response.text();
   return text || null;
@@ -75,14 +74,11 @@ class ApiClient {
       manualErrorHandling = false,
       headers: customHeaders,
       body,
+      credentials = "include",
       ...rest
     } = options;
-    const headers = new Headers(customHeaders);
-    const token = getToken();
 
-    if (token) {
-      headers.set("Authorization", `Bearer ${token}`);
-    }
+    const headers = new Headers(customHeaders);
 
     const preparedBody = prepareBody(body, headers);
 
@@ -92,6 +88,7 @@ class ApiClient {
         method: rest.method ?? "GET",
         headers,
         body: preparedBody,
+        credentials,
       });
 
       const data = await parseResponse(response);
