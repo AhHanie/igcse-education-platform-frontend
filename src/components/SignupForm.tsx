@@ -9,9 +9,63 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft } from "lucide-react";
+import { verifyRegistration, completeRegistration } from "@/app/api/auth";
+import { ApiError } from "@/app/api/client";
 
 type SignupStep = "email" | "password";
+
+interface ValidationErrorDetail {
+  type: string;
+  loc: (string | number)[];
+  msg: string;
+  input?: unknown;
+  ctx?: Record<string, unknown>;
+}
+
+interface ValidationErrorResponse {
+  detail?: ValidationErrorDetail[] | string;
+  message?: string;
+}
+
+function extractErrorMessage(payload: unknown, status?: number): string {
+  if (!payload) {
+    return status === 422
+      ? "Validation error. Please check your input."
+      : "Something went wrong. Please try again.";
+  }
+
+  const error = payload as ValidationErrorResponse;
+
+  // Handle FastAPI validation errors (422 status)
+  if (Array.isArray(error.detail)) {
+    const messages = error.detail.map((err) => err.msg);
+    return messages.join(". ");
+  }
+
+  // Handle simple message format
+  if (typeof error.detail === "string") {
+    return error.detail;
+  }
+
+  if (error.message) {
+    return error.message;
+  }
+
+  // Fallback based on status
+  if (status === 422) {
+    return "Validation error. Please check your input.";
+  }
+
+  if (status === 400) {
+    return "Invalid request. Please check your input.";
+  }
+
+  if (status === 401) {
+    return "Username or code incorrect";
+  }
+
+  return "Something went wrong. Please try again.";
+}
 
 export function SignupForm({
   className,
@@ -26,28 +80,12 @@ export function SignupForm({
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
-  const validateEmail = (emailValue: string): boolean => {
-    // Basic email format validation
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    return emailRegex.test(emailValue);
-  };
-
-  const validateSchoolCode = (code: string): boolean => {
-    // Check if code contains only numbers
-    return /^\d+$/.test(code);
-  };
-
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError("");
 
     if (!email.trim()) {
-      setError("Please enter your email address");
-      return;
-    }
-
-    if (!validateEmail(email)) {
-      setError("Please enter a valid email address");
+      setError("Please enter your username");
       return;
     }
 
@@ -56,24 +94,26 @@ export function SignupForm({
       return;
     }
 
-    if (!validateSchoolCode(schoolCode)) {
-      setError("School code must contain only numbers");
-      return;
-    }
-
     setIsLoading(true);
 
-    // TODO: Verify with backend if email and school code are valid
-    // For now, any valid email format and numeric school code is accepted
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Call verify-registration endpoint
+      // Validates username and code combination
+      await verifyRegistration({
+        username: email.trim(),
+        code: schoolCode.trim(),
+      });
 
-      // In the future, replace this with actual API call:
-
+      // If successful, move to password step
       setStep("password");
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      // Handle API errors
+      if (err instanceof ApiError) {
+        const errorMessage = extractErrorMessage(err.payload, err.status);
+        setError(errorMessage);
+      } else {
+        setError("Network error. Please check your connection and try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -100,18 +140,26 @@ export function SignupForm({
 
     setIsLoading(true);
 
-    // TODO: Implement actual signup logic
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Call complete-registration endpoint
+      const response = await completeRegistration({
+        username: email.trim(),
+        code: schoolCode.trim(),
+        password: password,
+        confirm_password: confirmPassword,
+      });
 
-      // In the future, replace this with actual API call:
-
-      console.log("Signup successful", { email, password });
-      // Redirect to home page
+      console.log("Registration successful", response);
+      // Redirect to home page after successful registration
       navigate("/");
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      // Handle API errors
+      if (err instanceof ApiError) {
+        const errorMessage = extractErrorMessage(err.payload, err.status);
+        setError(errorMessage);
+      } else {
+        setError("Network error. Please check your connection and try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -136,7 +184,7 @@ export function SignupForm({
               </p>
             </div>
             <Field>
-              <FieldLabel htmlFor="email">Email</FieldLabel>
+              <FieldLabel htmlFor="email">Username</FieldLabel>
               <Input
                 id="email"
                 type="email"
@@ -150,7 +198,7 @@ export function SignupForm({
                 disabled={isLoading}
               />
               <FieldDescription>
-                The email provided by your school.
+                The username provided by your school.
               </FieldDescription>
             </Field>
             <Field>
@@ -169,7 +217,7 @@ export function SignupForm({
                 inputMode="numeric"
               />
               <FieldDescription>
-                Enter the numeric code provided by your school.
+                Enter the code provided by your school.
               </FieldDescription>
             </Field>
             {error && <p className="text-sm text-destructive">{error}</p>}

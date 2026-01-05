@@ -4,6 +4,8 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { login } from "@/app/api/auth";
+import { ApiError } from "@/app/api/client";
 
 export function LoginForm({
   className,
@@ -31,18 +33,30 @@ export function LoginForm({
 
     setIsLoading(true);
 
-    // TODO: Implement actual login logic
     try {
-      // Simulate API call
-      await new Promise((resolve) => setTimeout(resolve, 500));
+      // Call the login API endpoint
 
-      // In the future, replace this with actual API call:
+      const response = await login({ username_or_email: email, password });
 
-      console.log("Login successful", { email, password });
-      // Redirect to home page
+      console.log("Login successful", response);
+
+      // Redirect to home page after successful login
       navigate("/");
     } catch (err) {
-      setError("Something went wrong. Please try again.");
+      // Handle API errors
+      if (err instanceof ApiError) {
+        // Extract error message from API response
+        const errorMessage =
+          (err.payload as { message?: string })?.message ||
+          (err.status === 401
+            ? "Invalid email or password"
+            : err.status === 400
+            ? "Please check your input and try again"
+            : "Something went wrong. Please try again.");
+        setError(errorMessage);
+      } else {
+        setError("Network error. Please check your connection and try again.");
+      }
     } finally {
       setIsLoading(false);
     }
@@ -62,7 +76,7 @@ export function LoginForm({
       </div>
       <div className="grid gap-6">
         <div className="grid gap-2">
-          <Label htmlFor="email">Email</Label>
+          <Label htmlFor="email">Email or Username</Label>
           <Input
             id="email"
             type="email"
