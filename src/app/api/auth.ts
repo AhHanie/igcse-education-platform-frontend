@@ -1,7 +1,12 @@
 import { apiClient } from "./client";
 
-export interface LoginRequest {
-  username_or_email: string;
+export interface LoginWithEmailRequest {
+  email: string;
+  password: string;
+}
+
+export interface LoginWithUsernameRequest {
+  username: string;
   password: string;
 }
 
@@ -30,11 +35,18 @@ export interface LoginResponse {
   roles: Role[];
 }
 
-// Login endpoint that authenticates the user.
-export async function login(credentials: LoginRequest): Promise<LoginResponse> {
-  return apiClient.post<LoginResponse>("/auth/login", credentials, {
+// Login with email endpoint
+export async function loginWithEmail(
+  credentials: LoginWithEmailRequest
+): Promise<LoginResponse> {
+  return apiClient.post<LoginResponse>("/auth/login-email", credentials);
+}
 
-  });
+// Login with username endpoint
+export async function loginWithUsername(
+  credentials: LoginWithUsernameRequest
+): Promise<LoginResponse> {
+  return apiClient.post<LoginResponse>("/auth/login-username", credentials);
 }
 
 export interface VerifyRegistrationRequest {
