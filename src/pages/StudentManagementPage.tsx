@@ -6,6 +6,7 @@ import { Heading } from "@/components/ui/typography";
 import { Separator } from "@/components/ui/separator";
 import { PaginatedTable } from "@/components/ui/paginated-table";
 import { AddStudentModal } from "@/features/student/components/AddStudentModal";
+import { BulkUploadModal } from "@/features/student/components/BulkUploadModal";
 import type { User } from "@/types/common";
 
 // TODO: Remove hardcoding once authentication is implemented on frontend side
@@ -13,6 +14,7 @@ const SCHOOL_SHORT_NAME = "school";
 
 export default function StudentManagementPage() {
   const [createOpen, setCreateOpen] = React.useState(false);
+  const [bulkUploadOpen, setBulkUploadOpen] = React.useState(false);
 
   const [tableKey, setTableKey] = React.useState(0);
   const refreshTable = () => setTableKey((k) => k + 1);
@@ -24,7 +26,10 @@ export default function StudentManagementPage() {
           Student Management
         </Heading>
 
-        <div className="absolute right-0">
+        <div className="absolute right-0 flex gap-2">
+          <Button variant="outline" onClick={() => setBulkUploadOpen(true)}>
+            Bulk Upload Students
+          </Button>
           <Button variant="outline" onClick={() => setCreateOpen(true)}>
             Add New Student
           </Button>
@@ -77,6 +82,12 @@ export default function StudentManagementPage() {
         onOpenChange={setCreateOpen}
         onCreated={refreshTable}
         schoolShortName={SCHOOL_SHORT_NAME}
+      />
+
+      <BulkUploadModal
+        open={bulkUploadOpen}
+        onOpenChange={setBulkUploadOpen}
+        onSuccess={refreshTable}
       />
     </div>
   );
