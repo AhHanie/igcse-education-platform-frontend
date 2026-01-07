@@ -9,21 +9,23 @@ import {
   loginWithUsername,
 } from "@/app/api/auth";
 import { ApiError } from "@/app/api/client";
+import { useAppStore } from "@/app/store/useAppStore";
 
 export function LoginForm({
   className,
   ...props
 }: React.ComponentPropsWithoutRef<"div">) {
   const navigate = useNavigate();
-  
+  const setUser = useAppStore((state) => state.setUser);
+
   // Email login state
   const [email, setEmail] = useState("");
   const [emailPassword, setEmailPassword] = useState("");
-  
+
   // Username login state
   const [username, setUsername] = useState("");
   const [usernamePassword, setUsernamePassword] = useState("");
-  
+
   // Shared state
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -45,12 +47,14 @@ export function LoginForm({
     setIsLoading(true);
 
     try {
-      const response = await loginWithEmail({
+      const userProfile = await loginWithEmail({
         email: email.trim(),
         password: emailPassword,
       });
 
-      console.log("Login successful", response);
+      // Store user profile in global state
+      setUser(userProfile);
+      console.log("Login successful", userProfile);
       navigate("/");
     } catch (err) {
       if (err instanceof ApiError) {
@@ -87,12 +91,14 @@ export function LoginForm({
     setIsLoading(true);
 
     try {
-      const response = await loginWithUsername({
+      const userProfile = await loginWithUsername({
         username: username.trim(),
         password: usernamePassword,
       });
 
-      console.log("Login successful", response);
+      // Store user profile in global state
+      setUser(userProfile);
+      console.log("Login successful", userProfile);
       navigate("/");
     } catch (err) {
       if (err instanceof ApiError) {

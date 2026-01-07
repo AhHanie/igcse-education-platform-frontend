@@ -142,16 +142,16 @@ export function SignupForm({
 
     try {
       // Call complete-registration endpoint
-      const response = await completeRegistration({
+      await completeRegistration({
         username: email.trim(),
         code: schoolCode.trim(),
         password: password,
         confirm_password: confirmPassword,
       });
 
-      console.log("Registration successful", response);
-      // Redirect to home page after successful registration
-      navigate("/");
+      console.log("Registration successful");
+      // Redirect to login page after successful registration
+      navigate("/login");
     } catch (err) {
       // Handle API errors
       if (err instanceof ApiError) {

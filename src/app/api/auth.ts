@@ -10,30 +10,39 @@ export interface LoginWithUsernameRequest {
   password: string;
 }
 
+export interface Permission {
+  id: string;
+  key: string;
+  description: string | null;
+}
+
 export interface Role {
   id: string;
   name: string;
-  description: string;
+  description: string | null;
   is_system_role: boolean;
-  permissions: unknown[]; // adjust type later
+  permissions: Permission[];
 }
 
-export interface LoginResponse {
+export interface UserProfile {
   id: string;
   organization_id: string;
-  school_id: string;
-  username: string;
-  email: string | null;
-  display_name: string;
+  school_id: string | null;
+  username: string | null;
+  email: string;
+  display_name: string | null;
   gender: number | null;
   is_active: boolean;
   must_reset: boolean;
-  profile: unknown | null; // adjust type later
-  last_active_at: string;
+  profile: Record<string, unknown> | null;
+  last_active_at: string | null;
   created_at: string;
-  updated_at: string;
+  updated_at: string | null;
   roles: Role[];
 }
+
+// Alias for backward compatibility
+export type LoginResponse = UserProfile;
 
 // Login with email endpoint
 export async function loginWithEmail(
@@ -80,13 +89,12 @@ export async function completeRegistration(
   return apiClient.post<LoginResponse>("/auth/complete-registration", data);
 }
 
-//Check if the user is authenticated by verifying the session.
-// export async function verifySession(): Promise<{
-//   authenticated: boolean;
-//   user?: LoginResponse;
-// }> {
-//   return apiClient.get<{
-//     authenticated: boolean;
-//     user?: LoginResponse;
-//   }>("/auth/verify");
-// }
+// Get current authenticated user's profile
+export async function getCurrentUser(): Promise<UserProfile> {
+  return apiClient.get<UserProfile>("/auth/me");
+}
+
+// Logout current user
+export async function logout(): Promise<void> {
+  return apiClient.post<void>("/auth/logout", {});
+}
