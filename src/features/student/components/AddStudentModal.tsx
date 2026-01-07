@@ -26,19 +26,21 @@ type UsersByUsernameResponse = {
   total: number;
 };
 
-// TODO: Remove hardcoding once authentication is implemented on frontend side
-const ORG_ID = "887b871b-1f73-4cb4-a512-0af6510d61b3";
-const SCHOOL_ID = "ad33eec3-892a-47d8-b6e3-b06292c8e3e0";
-
 function clamp01Gender(v: string): 0 | 1 {
   return v === "1" ? 1 : 0;
 }
+
+type AdminUserData = {
+  shortSchoolName: string;
+  organizationId: string;
+  schoolId: string;
+};
 
 export type AddStudentModalProps = {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated?: () => void;
-  schoolShortName: string;
+  userData: AdminUserData;
 };
 
 type UsernameCheckState =
@@ -71,7 +73,7 @@ export function AddStudentModal({
   open,
   onOpenChange,
   onCreated,
-  schoolShortName,
+  userData,
 }: AddStudentModalProps) {
   const [username, setUsername] = React.useState("");
   const [displayName, setDisplayName] = React.useState("");
@@ -131,8 +133,7 @@ export function AddStudentModal({
       return;
     }
 
-    // TODO: Remove hardcoding once authentication is implemented on frontend side
-    const value = username.trim() + "@ts";
+    const value = username.trim() + "@" + userData.shortSchoolName;
 
     // Debounce: wait until user stops typing
     const t = window.setTimeout(async () => {
@@ -190,8 +191,8 @@ export function AddStudentModal({
     try {
       await apiClient.post("/users", {
         role_name: "Student",
-        organization_id: ORG_ID,
-        school_id: SCHOOL_ID,
+        organization_id: userData.organizationId,
+        school_id: userData.schoolId,
         username: username.trim(),
         display_name: displayName.trim(),
         gender,
@@ -242,7 +243,7 @@ export function AddStudentModal({
                     }
                   />
                   <div className="text-muted-foreground text-sm sm:text-base">
-                    @{schoolShortName}
+                    @{userData.shortSchoolName}
                   </div>
                 </div>
 

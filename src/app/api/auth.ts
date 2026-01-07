@@ -24,12 +24,23 @@ export interface Role {
   permissions: Permission[];
 }
 
+export interface School {
+  id: string;
+  organization_id: string;
+  name: string;
+  short_name: string | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string | null;
+}
+
 export interface UserProfile {
   id: string;
   organization_id: string;
   school_id: string | null;
+  school: School | null;
   username: string | null;
-  email: string;
+  email: string | null;
   display_name: string | null;
   gender: number | null;
   is_active: boolean;

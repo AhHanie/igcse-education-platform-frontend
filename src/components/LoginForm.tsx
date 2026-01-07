@@ -4,10 +4,7 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import {
-  loginWithEmail,
-  loginWithUsername,
-} from "@/app/api/auth";
+import { loginWithEmail, loginWithUsername } from "@/app/api/auth";
 import { ApiError } from "@/app/api/client";
 import { useAppStore } from "@/app/store/useAppStore";
 
@@ -54,7 +51,6 @@ export function LoginForm({
 
       // Store user profile in global state
       setUser(userProfile);
-      console.log("Login successful", userProfile);
       navigate("/");
     } catch (err) {
       if (err instanceof ApiError) {
@@ -98,7 +94,6 @@ export function LoginForm({
 
       // Store user profile in global state
       setUser(userProfile);
-      console.log("Login successful", userProfile);
       navigate("/");
     } catch (err) {
       if (err instanceof ApiError) {

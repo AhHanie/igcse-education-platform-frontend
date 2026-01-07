@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { useAppStore } from "@/app/store/useAppStore";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Heading } from "@/components/ui/typography";
@@ -9,10 +10,13 @@ import { AddStudentModal } from "@/features/student/components/AddStudentModal";
 import { BulkUploadModal } from "@/features/student/components/BulkUploadModal";
 import type { User } from "@/types/common";
 
-// TODO: Remove hardcoding once authentication is implemented on frontend side
-const SCHOOL_SHORT_NAME = "school";
-
 export default function StudentManagementPage() {
+  const user = useAppStore((state) => state.user);
+
+  // Assert that user exists and has a school
+  if (!user || !user.school) {
+    throw new Error("User must be authenticated and belong to a school");
+  }
   const [createOpen, setCreateOpen] = React.useState(false);
   const [bulkUploadOpen, setBulkUploadOpen] = React.useState(false);
 
@@ -81,7 +85,11 @@ export default function StudentManagementPage() {
         open={createOpen}
         onOpenChange={setCreateOpen}
         onCreated={refreshTable}
-        schoolShortName={SCHOOL_SHORT_NAME}
+        userData={{
+          shortSchoolName: user.school.short_name as string,
+          organizationId: user.organization_id,
+          schoolId: user.school_id as string,
+        }}
       />
 
       <BulkUploadModal
