@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 // import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Moon, Sun } from "lucide-react";
@@ -12,13 +12,18 @@ interface MainLayoutProps {
 
 const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
   const { mode, toggleMode } = useThemeMode();
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+
+  const toggleSidebar = () => {
+    setSidebarCollapsed(!sidebarCollapsed);
+  };
 
   return (
-    <div className=" min-h-screen flex">
-      <Sidebar open={true} onClose={() => {}} />
-      <div className="flex flex-col w-full main">
+    <div className="min-h-screen flex w-full">
+      <Sidebar collapsed={sidebarCollapsed} onToggle={toggleSidebar} />
+      <div className="flex flex-col main" style={{ marginLeft: sidebarCollapsed ? '80px' : '260px', transition: 'margin-left 0.3s ease' }}>
       <nav className="header">
-        <div>
+        <div className="flex-1 min-w-0">
         <h1>Welcome back, Omar! 👋</h1>
         <p>Ready to continue your learning journey?</p>
         </div>
@@ -26,7 +31,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({ children }) => {
             variant="ghost"
             size="icon"
             onClick={toggleMode}
-            className="ml-4"
+            className="ml-4 flex-shrink-0"
             aria-label="Toggle theme"
           >
             {mode === "dark" ? (
