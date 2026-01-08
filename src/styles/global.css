@@ -4,13 +4,13 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 223, 47%, 97%;
     --foreground: 224 71.4% 4.1%;
     --card: 0 0% 100%;
     --card-foreground: 224 71.4% 4.1%;
     --popover: 0 0% 100%;
     --popover-foreground: 224 71.4% 4.1%;
-    --primary: 262.1 83.3% 57.8%;
+    --primary: 239, 85%, 67%;
     --primary-foreground: 210 20% 98%;
     --secondary: 220 14.3% 95.9%;
     --secondary-foreground: 220.9 39.3% 11%;
@@ -20,7 +20,7 @@
     --accent-foreground: 220.9 39.3% 11%;
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 20% 98%;
-    --border: 220 13% 91%;
+    --border: 218, 26%, 92%;
     --input: 220 13% 91%;
     --ring: 262.1 83.3% 57.8%;
     --radius: 0.5rem;
@@ -29,6 +29,20 @@
     --chart-3: 197 37% 24%;
     --chart-4: 43 74% 66%;
     --chart-5: 27 87% 67%;
+    --text: 225, 19%, 13%;
+    --text2: 219, 10%, 40%;
+    --text3: 218, 11%, 65%;
+    --primary-light: 226, 100%, 97%;
+    --primary-dark: 243, 75%, 59%;
+    --success: 142, 71%, 45%;
+    --success-light: 141, 84%, 93%;
+    --warning: 38, 92%, 50%;
+    --warning-light: 48, 96%, 89%;
+    --danger: 0, 84%, 60%;
+    --danger-light: 0, 93%, 94%;
+    --blue: 217, 91%, 60%;
+    --blue-light: 214, 95%, 93%;
+
   }
 
   .dark {
@@ -56,6 +70,7 @@
     --chart-3: 30 80% 55%;
     --chart-4: 280 65% 60%;
     --chart-5: 340 75% 55%;
+    --primary-light: 224 71.4% 4.1%;
   }
 }
 
