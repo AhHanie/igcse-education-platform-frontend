@@ -1,29 +1,11 @@
-     :root {
-      --bg: #f4f6fb;
-      --card: #ffffff;
-      --border: #e4e8ef;
-      --text: #1a1d26;
-      --text2: #5c6370;
-      --text3: #9ca3af;
-      --primary: #6366f1;
-      --primary-dark: #4f46e5;
-      --primary-light: #eef2ff;
-      --success: #22c55e;
-      --success-light: #dcfce7;
-      --warning: #f59e0b;
-      --warning-light: #fef3c7;
-      --danger: #ef4444;
-      --danger-light: #fee2e2;
-      --blue: #3b82f6;
-      --blue-light: #dbeafe;
-    }
+
 h1 {
   line-height: 1.3;
 }
 	.sidebar {
       width: 260px;
-      background: #ffffff;
-      border-right: 1px solid #e4e8ef;
+      background: hsl(var(--card));
+      border-right: 1px solid hsl(var(--border));
       height: 100vh;
       position: fixed;
       display: flex;
@@ -35,21 +17,21 @@ h1 {
       display: flex;
       align-items: center;
       gap: 12px;
-      border-bottom: 1px solid #e4e8ef;
+      border-bottom: 1px solid hsl(var(--border));
     }
     .logo-icon {
       width: 42px;
       height: 42px;
-      background: linear-gradient(135deg, #6366f1, #4f46e5);
+      background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-dark)));
       border-radius: 12px;
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: hsl(var(--card));
       font-size: 20px;
     }
     .logo h1 { font-size: 18px; font-weight: 700; line-height: normal; }
-    .logo span { font-size: 12px; color: #5c6370; display: block; line-height: normal; }
+    .logo span { font-size: 12px; color: hsl(var(--text2)); display: block; line-height: normal; }
     .nav { flex: 1; padding: 16px 12px; }
     .nav-item {
       display: flex;
@@ -57,7 +39,7 @@ h1 {
       gap: 12px;
       padding: 12px 16px;
       border-radius: 10px;
-      color: #5c6370;
+      color: hsl(var(--text2));
       font-weight: 500;
       cursor: pointer;
       transition: all 0.15s;
@@ -69,12 +51,15 @@ h1 {
       margin-bottom: 4px;
 	    height: 42px;
     }
-    .nav-item:hover { background: #f4f6fb; color: #1a1d26; }
-    .nav-item.active { background: #eef2ff; color: #6366f1; font-weight: 600; }
+    .nav-item:hover { background: hsl(var(--background)); color: hsl(var(--text)); }
+    .nav-item.active { background: hsl(var(--primary-light)); color: hsl(var(--primary)); font-weight: 600; }
+    .dark .nav-item.active { border: 1px solid hsl(var(--primary)); }
+    .dark .nav-item:hover { color: hsl(var(--text3)) }
+
     .user-card {
       margin: 16px;
       padding: 14px;
-      background: #f4f6fb;
+      background: hsl(var(--background));
       border-radius: 12px;
       display: flex;
       align-items: center;
@@ -88,9 +73,9 @@ h1 {
       display: flex;
       align-items: center;
       justify-content: center;
-      color: white;
+      color: hsl(var(--card));
       font-weight: 700;
       font-size: 14px;
     }
     .user-card h4 { font-size: 14px; font-weight: 600; line-height: normal; }
-    .user-card p { font-size: 12px; color: #5c6370; line-height: normal; }
+    .user-card p { font-size: 12px; color: hsl(var(--text2)); line-height: normal; }

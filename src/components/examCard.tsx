@@ -54,7 +54,7 @@ const ExamCard: React.FC<ExamCardProps> = ({
         <div className="exam-date">{date}</div>
       </div>
 
-      <button className="btn btn-primary" onClick={onStart}>
+      <button className="btn btn-primary bg-primary" onClick={onStart}>
         Start
       </button>
     </div>

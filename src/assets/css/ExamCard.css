@@ -1,18 +1,19 @@
+    
     .exam-list { display: flex; flex-direction: column; gap: 12px; }
     .exam-card {
-      background: #ffffff;
-      border: 1px solid #e4e8ef;
+      background: hsl(var(--card));
+      border: 1px solid hsl(var(--border));
       border-radius: 14px;
       padding: 18px 22px;
       display: flex;
       align-items: center;
       gap: 18px;
-      border-left: 4px solid #6366f1;
+      border-left: 4px solid hsl(var(--primary));
     }
 
-    .exam-card.danger { border-left-color: #ef4444; }
-    .exam-card.success { border-left-color: #22c55e; opacity: 0.85; }
-    .exam-card.info { border-left-color: #6366f1; }
+    .exam-card.danger { border-left-color: hsl(var(--danger)); }
+    .exam-card.success { border-left-color: hsl(var(--success)); opacity: 0.85; }
+    .exam-card.info { border-left-color: hsl(var(--primary)); }
 
     .exam-icon {
       width: 50px;
@@ -24,22 +25,22 @@
       font-size: 24px;
     }
 
-    .exam-icon.bio { background: #dcfce7; }
-    .exam-icon.chem { background: #eef2ff; }
-    .exam-icon.phys { background: #dbeafe; }
+    .exam-icon.bio { background: hsl(var(--success-light)); }
+    .exam-icon.chem { background: hsl(var(--primary-light)); }
+    .exam-icon.phys { background: hsl(var(--blue-light)); }
 
     .exam-info { flex: 1; }
     .exam-title { font-size: 16px; font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 10px; }
-    .exam-meta { font-size: 13px; color: #5c6370; }
-    .exam-details { font-size: 12px; color: #9ca3af; margin-top: 4px; }
+    .exam-meta { font-size: 13px; color: hsl(var(--text2)); }
+    .exam-details { font-size: 12px; color: hsl(var(--text3)); margin-top: 4px; }
 
     .exam-right { text-align: right; }
     .exam-date { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
     .exam-score { font-size: 22px; font-weight: 700; }
-    .exam-score.good { color: #22c55e; }
-    .exam-score.mid { color: #f59e0b; }
-    .exam-score.bad { color: #ef4444; }
-    .exam-xp { font-size: 12px; color: #5c6370; }
+    .exam-score.good { color: hsl(var(--success)); }
+    .exam-score.mid { color: hsl(var(--warning)); }
+    .exam-score.bad { color: hsl(var(--danger)); }
+    .exam-xp { font-size: 12px; color: hsl(var(--text2)); }
     .badge {
       display: inline-block;
       padding: 3px 10px;
@@ -47,8 +48,8 @@
       font-size: 11px;
       font-weight: 600;
     }
-    .badge-danger { background: #fee2e2; color: #ef4444; }
-    .badge-success { background: #dcfce7; color: #22c55e; }
+    .badge-danger { background: hsl(var(--danger-light)); color: hsl(var(--danger)); }
+    .badge-success { background: hsl(var(--success-light)); color: hsl(var(--success)); }
 
     /* Buttons */
     .btn {
@@ -67,16 +68,16 @@
     }
 
     .btn-primary {
-      background: #6366f1;
+      background: hsl(var(--primary));
       color: white;
     }
-    .btn-primary:hover { background: #4f46e5; }
+    .btn-primary:hover { background: hsl(var(--primary-dark)); }
 
     .btn-secondary {
-      background: #f4f6fb;
-      color: #1a1d26;
-      border: 1px solid #e4e8ef;
+      background: hsl(var(--background));
+      color: hsl(var(--text));
+      border: 1px solid hsl(var(--border));
     }
-    .btn-secondary:hover { background: #e4e8ef; }
+    .btn-secondary:hover { background: hsl(var(--border)); }
 
     .btn-lg { padding: 14px 28px; font-size: 15px; }
