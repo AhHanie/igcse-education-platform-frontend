@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,17 @@ import {
   FieldLabel,
 } from "@/components/ui/field";
 import { Input } from "@/components/ui/input";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalHeaderText,
+  ModalTitle,
+  ModalDescription,
+  ModalBody,
+  ModalFooter,
+} from "@/components/ui/modal";
 import { verifyRegistration, completeRegistration } from "@/app/api/auth";
 import { ApiError } from "@/app/api/client";
 
@@ -79,6 +90,17 @@ export function SignupForm({
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuccessModal, setShowSuccessModal] = useState(false);
+
+  // Auto-navigate to login after showing success message
+  useEffect(() => {
+    if (showSuccessModal) {
+      const timer = setTimeout(() => {
+        navigate("/login");
+      }, 2500);
+      return () => clearTimeout(timer);
+    }
+  }, [showSuccessModal, navigate]);
 
   const handleEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -150,8 +172,8 @@ export function SignupForm({
       });
 
       console.log("Registration successful");
-      // Redirect to login page after successful registration
-      navigate("/login");
+      // Show success modal before redirecting to login
+      setShowSuccessModal(true);
     } catch (err) {
       // Handle API errors
       if (err instanceof ApiError) {
@@ -297,6 +319,32 @@ export function SignupForm({
           </FieldGroup>
         </form>
       )}
+
+      {/* Success Modal */}
+      <Modal open={showSuccessModal} onOpenChange={setShowSuccessModal}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>
+            <ModalHeaderText>
+              <ModalTitle>Registration Successful!</ModalTitle>
+              <ModalDescription>
+                Your account has been created successfully.
+              </ModalDescription>
+            </ModalHeaderText>
+          </ModalHeader>
+
+          <ModalBody>
+            <p className="text-sm text-muted-foreground">
+              You will be redirected to the login page in a moment. Please use
+              your credentials to sign in.
+            </p>
+          </ModalBody>
+
+          <ModalFooter>
+            <Button onClick={() => navigate("/login")}>Go to Login</Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }
