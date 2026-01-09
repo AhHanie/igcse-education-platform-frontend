@@ -1,7 +1,32 @@
 import "../assets/css/Sidebar.css";
 
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Users,
+  type LucideIcon,
+} from "lucide-react";
+import { useNavigate, useLocation } from "react-router-dom";
 import { useAppStore } from "@app/store/useAppStore";
+
+// Navigation item type
+interface NavItem {
+  name: string;
+  icon: LucideIcon;
+  route: string;
+}
+
+// Role-based navigation configuration
+// TODO: Change this to be controller by the backend
+const ROLE_NAV_ITEMS: Record<string, NavItem[]> = {
+  "School Admin": [
+    {
+      name: "Student Management",
+      icon: Users,
+      route: "/students/management",
+    },
+  ],
+};
 
 // Helper function to generate initials from display name
 const getInitials = (displayName: string | null | undefined): string => {
@@ -18,21 +43,23 @@ const getInitials = (displayName: string | null | undefined): string => {
 const Sidebar = (props: { collapsed: boolean; onToggle: () => void }) => {
   const { collapsed, onToggle } = props;
   const user = useAppStore((state) => state.user);
+  const navigate = useNavigate();
+  const location = useLocation();
 
   const userDisplayName = user?.display_name || user?.username || "User";
   const userInitials = getInitials(user?.display_name);
 
-  const showScreen = (id: string) => {
-    document
-      .querySelectorAll(".screen")
-      .forEach((s) => s.classList.remove("active"));
-    document.getElementById(id)?.classList.add("active");
-    document.querySelectorAll(".nav-item").forEach((n, i) => {
-      n.classList.remove("active");
-      const screens = ["dashboard", "tools", "subjects", "exams", "progress"];
-      if (screens[i] === id) n.classList.add("active");
-    });
-  };
+  // Get all nav items for user's roles
+  const navItems: NavItem[] = [];
+  const userRoles = user?.roles || [];
+
+  // Concatenate nav items from all user roles
+  userRoles.forEach((role) => {
+    const roleNavItems = ROLE_NAV_ITEMS[role.name];
+    if (roleNavItems) {
+      navItems.push(...roleNavItems);
+    }
+  });
 
   return (
     <div className={`sidebar font-primary ${collapsed ? "collapsed" : ""}`}>
@@ -53,60 +80,26 @@ const Sidebar = (props: { collapsed: boolean; onToggle: () => void }) => {
           </div>
         )}
       </div>
-      {/* Nav item */}
 
       <ul className="nav">
-        {/* <Links routes={routes} /> */}
-        <li
-          className="nav-item active"
-          onClick={() => {
-            showScreen("dashboard");
-          }}
-          title="Dashboard"
-        >
-          <span className="nav-icon">📊</span>
-          {!collapsed && <span className="nav-text">Dashboard</span>}
-        </li>
-        <li
-          className="nav-item"
-          onClick={() => {
-            showScreen("tools");
-          }}
-          title="AI Tools"
-        >
-          <span className="nav-icon">🤖</span>
-          {!collapsed && <span className="nav-text">AI Tools</span>}
-        </li>
-        <li
-          className="nav-item"
-          onClick={() => {
-            showScreen("subjects");
-          }}
-          title="Subjects"
-        >
-          <span className="nav-icon">📚</span>
-          {!collapsed && <span className="nav-text">Subjects</span>}
-        </li>
-        <li
-          className="nav-item"
-          onClick={() => {
-            showScreen("exams");
-          }}
-          title="Exams"
-        >
-          <span className="nav-icon">📝</span>
-          {!collapsed && <span className="nav-text">Exams</span>}
-        </li>
-        <li
-          className="nav-item"
-          onClick={() => {
-            showScreen("progress");
-          }}
-          title="Progress"
-        >
-          <span className="nav-icon">📈</span>
-          {!collapsed && <span className="nav-text">Progress</span>}
-        </li>
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          const isActive = location.pathname === item.route;
+
+          return (
+            <li
+              key={item.route}
+              className={`nav-item ${isActive ? "active" : ""}`}
+              onClick={() => navigate(item.route)}
+              title={item.name}
+            >
+              <span className="nav-icon">
+                <Icon size={20} />
+              </span>
+              {!collapsed && <span className="nav-text">{item.name}</span>}
+            </li>
+          );
+        })}
       </ul>
 
       <div className="user-card">
