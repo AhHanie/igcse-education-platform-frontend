@@ -5,6 +5,7 @@ import {
   ChevronRight,
   Users,
   LogOut,
+  BookOpen,
   type LucideIcon,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -32,6 +33,13 @@ const ROLE_NAV_ITEMS: Record<string, NavItem[]> = {
       name: "Student Management",
       icon: Users,
       route: "/students/management",
+    },
+  ],
+  "System Admin": [
+    {
+      name: "Subject Management",
+      icon: BookOpen,
+      route: "/subjects/management",
     },
   ],
 };

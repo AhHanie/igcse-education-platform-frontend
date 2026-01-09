@@ -5,6 +5,7 @@ import MainLayout from "./components/layout/MainLayout";
 import { useThemeMode } from "./hooks/useThemeMode";
 import { useAppStore } from "@/app/store/useAppStore";
 import ErrorBoundary from "@/components/common/ErrorBoundary";
+import { ToastProvider } from "@/components/ui/toast";
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -31,18 +32,22 @@ const App: React.FC = () => {
   // Don't wrap login page with MainLayout
   if (isLoginPage || isSignupPage) {
     return (
-      <ErrorBoundary>
-        <AppRouter />
-      </ErrorBoundary>
+      <ToastProvider>
+        <ErrorBoundary>
+          <AppRouter />
+        </ErrorBoundary>
+      </ToastProvider>
     );
   }
 
   return (
-    <ErrorBoundary>
-      <MainLayout>
-        <AppRouter />
-      </MainLayout>
-    </ErrorBoundary>
+    <ToastProvider>
+      <ErrorBoundary>
+        <MainLayout>
+          <AppRouter />
+        </MainLayout>
+      </ErrorBoundary>
+    </ToastProvider>
   );
 };
 
