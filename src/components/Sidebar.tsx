@@ -4,10 +4,18 @@ import {
   ChevronLeft,
   ChevronRight,
   Users,
+  LogOut,
   type LucideIcon,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAppStore } from "@app/store/useAppStore";
+import {
+  Dropdown,
+  DropdownTrigger,
+  DropdownContent,
+  DropdownItem,
+} from "@components/ui/dropdown";
+import { logout } from "@app/api/auth";
 
 // Navigation item type
 interface NavItem {
@@ -61,6 +69,15 @@ const Sidebar = (props: { collapsed: boolean; onToggle: () => void }) => {
     }
   });
 
+  const handleLogout = async () => {
+    try {
+      await logout();
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
+
   return (
     <div className={`sidebar font-primary ${collapsed ? "collapsed" : ""}`}>
       <button
@@ -102,14 +119,24 @@ const Sidebar = (props: { collapsed: boolean; onToggle: () => void }) => {
         })}
       </ul>
 
-      <div className="user-card">
-        <div className="avatar">{userInitials}</div>
-        {!collapsed && (
-          <div>
-            <h4>{userDisplayName}</h4>
+      <Dropdown>
+        <DropdownTrigger asChild>
+          <div className="user-card">
+            <div className="avatar">{userInitials}</div>
+            {!collapsed && (
+              <div>
+                <h4>{userDisplayName}</h4>
+              </div>
+            )}
           </div>
-        )}
-      </div>
+        </DropdownTrigger>
+        <DropdownContent align="end" side="top">
+          <DropdownItem onClick={handleLogout}>
+            <LogOut />
+            Logout
+          </DropdownItem>
+        </DropdownContent>
+      </Dropdown>
     </div>
   );
 };
