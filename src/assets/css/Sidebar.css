@@ -120,11 +120,18 @@ h1 {
   color: hsl(var(--primary));
   font-weight: 600;
 }
+
+/* Dark mode nav item styles */
+.dark .nav-item {
+  color: hsl(var(--foreground));
+}
 .dark .nav-item.active {
   border: 1px solid hsl(var(--primary));
+  background: hsl(var(--primary) / 0.15);
 }
 .dark .nav-item:hover {
-  color: hsl(var(--text3));
+  background: hsl(var(--accent));
+  color: hsl(var(--accent-foreground));
 }
 
 .user-card {
