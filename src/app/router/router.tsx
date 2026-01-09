@@ -6,6 +6,7 @@ import LoginPage from "@pages/LoginPage";
 import SignupPage from "@pages/SignupPage";
 import NotFoundPage from "@pages/NotFoundPage";
 import StudentManagementPage from "@/pages/StudentManagementPage";
+import SubjectManagementPage from "@/pages/SubjectManagementPage";
 
 export const AppRouter: React.FC = () => {
   return (
@@ -15,6 +16,7 @@ export const AppRouter: React.FC = () => {
       <Route path="/login" element={<LoginPage />} />
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/students/management" element={<StudentManagementPage />} />
+      <Route path="/subjects/management" element={<SubjectManagementPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );

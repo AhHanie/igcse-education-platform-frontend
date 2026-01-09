@@ -19,6 +19,7 @@ import {
   ModalBody,
   ModalFooter,
 } from "@/components/ui/modal";
+import { useToast } from "@/components/ui/toast";
 import type { User } from "@/types/common";
 
 type UsersByUsernameResponse = {
@@ -75,6 +76,8 @@ export function AddStudentModal({
   onCreated,
   userData,
 }: AddStudentModalProps) {
+  const { success } = useToast();
+
   const [username, setUsername] = React.useState("");
   const [displayName, setDisplayName] = React.useState("");
   const [gender, setGender] = React.useState<0 | 1>(0);
@@ -199,6 +202,7 @@ export function AddStudentModal({
       });
 
       onOpenChange(false);
+      success("Student created", "The new student account has been added successfully.");
       onCreated?.();
     } catch (err: any) {
       setError(
