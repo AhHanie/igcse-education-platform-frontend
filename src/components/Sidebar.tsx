@@ -6,6 +6,7 @@ import {
   Users,
   LogOut,
   BookOpen,
+  FileText,
   type LucideIcon,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
@@ -26,7 +27,7 @@ interface NavItem {
 }
 
 // Role-based navigation configuration
-// TODO: Change this to be controller by the backend
+// TODO: Change this to be controlled by the backend
 const ROLE_NAV_ITEMS: Record<string, NavItem[]> = {
   "School Admin": [
     {
@@ -40,6 +41,11 @@ const ROLE_NAV_ITEMS: Record<string, NavItem[]> = {
       name: "Subject Management",
       icon: BookOpen,
       route: "/subjects/management",
+    },
+    {
+      name: "Document Management",
+      icon: FileText,
+      route: "/documents/management",
     },
   ],
 };
