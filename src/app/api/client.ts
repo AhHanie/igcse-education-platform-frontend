@@ -59,6 +59,9 @@ const prepareBody = (body: unknown, headers: Headers) => {
 };
 
 const parseResponse = async (response: Response) => {
+  // 204 No Content has no response body
+  if (response.status === 204) return null;
+
   const contentType = response.headers.get("content-type");
   const isJson = contentType?.includes("application/json");
 

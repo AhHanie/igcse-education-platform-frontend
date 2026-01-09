@@ -4,6 +4,7 @@ import { AppRouter } from "./app/router/router";
 import MainLayout from "./components/layout/MainLayout";
 import { useThemeMode } from "./hooks/useThemeMode";
 import { useAppStore } from "@/app/store/useAppStore";
+import ErrorBoundary from "@/components/common/ErrorBoundary";
 
 const App: React.FC = () => {
   const location = useLocation();
@@ -29,13 +30,19 @@ const App: React.FC = () => {
 
   // Don't wrap login page with MainLayout
   if (isLoginPage || isSignupPage) {
-    return <AppRouter />;
+    return (
+      <ErrorBoundary>
+        <AppRouter />
+      </ErrorBoundary>
+    );
   }
 
   return (
-    <MainLayout>
-      <AppRouter />
-    </MainLayout>
+    <ErrorBoundary>
+      <MainLayout>
+        <AppRouter />
+      </MainLayout>
+    </ErrorBoundary>
   );
 };
 
