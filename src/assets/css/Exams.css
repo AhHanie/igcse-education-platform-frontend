@@ -1,0 +1,22 @@
+    .tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 20px;
+    }
+
+    .tab {
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 14px;
+      cursor: pointer;
+      border: none;
+      background: hsl(var(--background));
+      color:  hsl(var(--text2));
+      font-family: inherit;
+      transition: all 0.15s;
+      }
+
+    .tab:hover { background: #e4e8ef; }
+    .tab.active { background: hsl(var(--primary)); color: white; }
+    .tab-count { opacity: 0.7; margin-left: 3px; }

@@ -1,23 +1,13 @@
 import "../assets/css/Sidebar.css"
-
 import React from "react";
+import Links from "./Links";
+import routes from "../routes";
 
 const Sidebar = (props: {
   open: boolean;
   onClose: React.MouseEventHandler<HTMLSpanElement>;
 }) => {
   const { open, onClose } = props;
-
-    const showScreen = (id: string) => {
-      document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-      document.getElementById(id)?.classList.add('active');
-      document.querySelectorAll('.nav-item').forEach((n, i) => {
-        n.classList.remove('active');
-        const screens = ['dashboard', 'tools', 'subjects', 'exams', 'progress'];
-        if (screens[i] === id) n.classList.add('active');
-      });
-    }
-
   return (
     <div
       className={`sidebar font-primary ${
@@ -40,12 +30,7 @@ const Sidebar = (props: {
       {/* Nav item */}
 
       <ul className="nav">
-        {/* <Links routes={routes} /> */}
-      <li className="nav-item active" onClick={() => {showScreen('dashboard')}}>📊 Dashboard</li>
-      <li className="nav-item" onClick={() => {showScreen('tools')}}>🤖 AI Tools</li>
-      <li className="nav-item" onClick={() => {showScreen('subjects')}}>📚 Subjects</li>
-      <li className="nav-item" onClick={() => {showScreen('exams')}}>📝 Exams</li>
-      <li className="nav-item" onClick={() => {showScreen('progress')}}>📈 Progress</li>
+        <Links routes={routes} />
       </ul>
     <div className="user-card">
       <div className="avatar">OA</div>
