@@ -8,6 +8,7 @@ import NotFoundPage from "@pages/NotFoundPage";
 import StudentManagementPage from "@/pages/StudentManagementPage";
 import SubjectManagementPage from "@/pages/SubjectManagementPage";
 import DocumentsManagementPage from "@/pages/DocumentsManagementPage";
+import AIToolsPage from "@/pages/AIToolsPage";
 
 export const AppRouter: React.FC = () => {
   return (
@@ -18,7 +19,11 @@ export const AppRouter: React.FC = () => {
       <Route path="/signup" element={<SignupPage />} />
       <Route path="/students/management" element={<StudentManagementPage />} />
       <Route path="/subjects/management" element={<SubjectManagementPage />} />
-      <Route path="/documents/management" element={<DocumentsManagementPage />} />
+      <Route
+        path="/documents/management"
+        element={<DocumentsManagementPage />}
+      />
+      <Route path="/ai-tools" element={<AIToolsPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
