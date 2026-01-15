@@ -7,6 +7,7 @@ import ExamsPage from "../src/pages/ExamsPage";
 import LoginPage from "../src/pages/LoginPage";
 import SignupPage from "../src/pages/SignupPage";
 import NotFoundPage from "../src/pages/NotFoundPage";
+import AiStadyPage from "./pages/AiStadyPage";
 
 const routes = [
   {
@@ -48,6 +49,15 @@ const routes = [
     component: <ExamsPage />,
     secondary: true,
   },
+ {
+    name: "Ai Study",
+    layout: "/admin",
+    path: "ai-study",
+    icon: "🤖",
+    component: <AiStadyPage />,
+    secondary: true,
+  },
+
 
 // Auth routes
   {
