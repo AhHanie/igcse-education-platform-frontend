@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import type { KeyboardEvent, ChangeEvent } from "react";
 import "../../assets/css/Ai-Chatpot.css"
-
+import FileUploader from "./uploader";
 type ModeType = "explain" | "solve" | "quiz" | "simplify" | "summarize";
 
 interface ChatInputProps {
@@ -13,6 +13,13 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
   const [message, setMessage] = useState("");
   const [isTall, setIsTall] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+
+    const handleUpload = async (file: File) => {
+    console.log("Uploading file:", file);
+
+    const formData = new FormData();
+    formData.append("file", file);
+    }
 
   useEffect(() => {
     if (!ref.current) return;
@@ -50,6 +57,10 @@ const ChatInput: React.FC<ChatInputProps> = ({ onSend }) => {
     <div className="input-area">
       {/* Feature Pills */}
       <div className="feature-pills">
+                <div >
+      <FileUploader onUpload={handleUpload}  />
+    </div>
+
         {[
           { key: "explain", label: "💡 Explain" },
           { key: "solve", label: "🧮 Solve Step-by-Step" },
