@@ -33,7 +33,7 @@ const defaultErrorHandler = (error: ApiError) => {
   });
 };
 
-const buildUrl = (path: string) => {
+export const buildUrl = (path: string) => {
   const sanitizedPath = path.startsWith("/") ? path : `/${path}`;
   return `${BASE_URL}${sanitizedPath}`;
 };

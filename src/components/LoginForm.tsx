@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { login } from "@/app/api/auth";
 import { ApiError } from "@/app/api/client";
 import { useAppStore } from "@/app/store/useAppStore";
+import { ROLE_NAV_ITEMS } from "@/components/Sidebar";
 
 export function LoginForm({
   className,
@@ -44,7 +45,20 @@ export function LoginForm({
 
       // Store user profile in global state
       setUser(userProfile);
-      navigate("/");
+
+      // Determine redirect route based on user roles
+      let redirectRoute = "/";
+      const userRoles = userProfile?.roles || [];
+
+      for (const role of userRoles) {
+        const roleNavItems = ROLE_NAV_ITEMS[role.name];
+        if (roleNavItems && roleNavItems.length > 0) {
+          redirectRoute = roleNavItems[0].route;
+          break;
+        }
+      }
+
+      navigate(redirectRoute);
     } catch (err) {
       if (err instanceof ApiError) {
         const errorMessage =

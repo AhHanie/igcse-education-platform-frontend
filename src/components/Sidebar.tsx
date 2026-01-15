@@ -29,7 +29,7 @@ interface NavItem {
 
 // Role-based navigation configuration
 // TODO: Change this to be controlled by the backend
-const ROLE_NAV_ITEMS: Record<string, NavItem[]> = {
+export const ROLE_NAV_ITEMS: Record<string, NavItem[]> = {
   Student: [
     {
       name: "AI Tools",
