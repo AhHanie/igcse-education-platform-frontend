@@ -1,11 +1,6 @@
 import { apiClient } from "./client";
 
-export interface LoginWithEmailRequest {
-  email: string;
-  password: string;
-}
-
-export interface LoginWithUsernameRequest {
+export interface LoginRequest {
   username: string;
   password: string;
 }
@@ -55,17 +50,8 @@ export interface UserProfile {
 // Alias for backward compatibility
 export type LoginResponse = UserProfile;
 
-// Login with email endpoint
-export async function loginWithEmail(
-  credentials: LoginWithEmailRequest
-): Promise<LoginResponse> {
-  return apiClient.post<LoginResponse>("/auth/login-email", credentials);
-}
-
-// Login with username endpoint
-export async function loginWithUsername(
-  credentials: LoginWithUsernameRequest
-): Promise<LoginResponse> {
+// Login endpoint
+export async function login(credentials: LoginRequest): Promise<LoginResponse> {
   return apiClient.post<LoginResponse>("/auth/login-username", credentials);
 }
 
