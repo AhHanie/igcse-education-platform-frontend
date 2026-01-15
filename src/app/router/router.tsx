@@ -9,6 +9,7 @@ import StudentManagementPage from "@/pages/StudentManagementPage";
 import SubjectManagementPage from "@/pages/SubjectManagementPage";
 import DocumentsManagementPage from "@/pages/DocumentsManagementPage";
 import AIToolsPage from "@/pages/AIToolsPage";
+import AIStudyPage from "@/pages/AIStudyPage";
 
 export const AppRouter: React.FC = () => {
   return (
@@ -24,6 +25,7 @@ export const AppRouter: React.FC = () => {
         element={<DocumentsManagementPage />}
       />
       <Route path="/ai-tools" element={<AIToolsPage />} />
+      <Route path="/chat" element={<AIStudyPage />} />
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
   );
