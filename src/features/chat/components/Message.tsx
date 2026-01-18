@@ -10,6 +10,7 @@ export interface MessageData {
   content: string;
   timestamp?: Date;
   isStreaming?: boolean;
+  isVoice?: boolean;
 }
 
 interface MessageProps {
@@ -32,7 +33,9 @@ const Message: React.FC<MessageProps> = ({ message }) => {
       >
         <div className="flex items-start gap-2">
           {!isUser && (
-            <span className="text-xl flex-shrink-0 mt-0.5">🤖</span>
+            <span className="text-xl flex-shrink-0 mt-0.5">
+              {message.isVoice ? "🎙️" : "🤖"}
+            </span>
           )}
           <div className="flex-1 min-w-0">
             <div
