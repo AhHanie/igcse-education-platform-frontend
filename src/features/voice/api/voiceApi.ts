@@ -31,6 +31,9 @@ export class VoiceWebSocketClient {
       if (this.config.subjectId) {
         params.set("subject_id", this.config.subjectId);
       }
+      if (this.config.feature) {
+        params.set("feature", this.config.feature);
+      }
       if (this.config.voice) {
         params.set("voice", this.config.voice);
       }
@@ -51,7 +54,11 @@ export class VoiceWebSocketClient {
       };
 
       this.ws.onclose = (event) => {
-        console.log("[Voice WS] Connection closed:", event.code, event.reason);
+        console.log("[Voice WS] Connection closed:", {
+          code: event.code,
+          reason: event.reason,
+          wasClean: event.wasClean,
+        });
         if (this.eventHandler) {
           this.eventHandler({
             type: "session.end",
@@ -92,6 +99,7 @@ export class VoiceWebSocketClient {
   }
 
   interrupt(): void {
+    console.log("[Voice WS] Sending interrupt event");
     this.send({ type: "interrupt" });
   }
 

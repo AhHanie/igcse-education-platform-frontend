@@ -61,7 +61,11 @@ const AIStudyPage: React.FC = () => {
     disconnect: voiceDisconnect,
     startListening,
     stopListening,
-  } = useVoiceSession({ voice: "shimmer" });
+  } = useVoiceSession({
+    voice: "shimmer",
+    feature: currentSubject?.subjectName === "All" ? toolId : `${toolId}_rag`,
+    subjectId: undefined, // TODO: Map subject name to UUID when subject context is needed
+  });
 
   // Map connection state to VoiceState type
   const voiceState: VoiceState =

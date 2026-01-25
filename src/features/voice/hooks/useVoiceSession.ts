@@ -68,24 +68,45 @@ export function useVoiceSession(
   const animationFrameRef = useRef<number | null>(null);
   const currentSourceRef = useRef<AudioBufferSourceNode | null>(null);
   const sessionStateRef = useRef<VoiceSessionState>("idle");
+  const playNextAudioChunkRef = useRef<(() => void) | null>(null);
 
   // Handle server events
   const handleServerEvent = useCallback((event: ServerEvent) => {
+    console.log("[Voice] Server event:", event.type, event);
+
     switch (event.type) {
       case "session.created":
         setSessionId(event.session_id);
         setConnectionState("connected");
         break;
 
+      case "response.start":
+        if (event.type === "response.start") {
+          console.log("[Voice] New response started:", event.response_id);
+          // A new response is starting - this means server is ready to speak
+          // We should transition from listening to ready to receive audio
+          if (sessionStateRef.current === "listening") {
+            console.log("[Voice] Transitioning from listening to idle for new response");
+            setSessionState("idle");
+          }
+        }
+        break;
+
       case "audio.delta":
-        // Queue audio for playback
-        const audioData = pcm16Base64ToFloat32(event.audio);
-        audioQueueRef.current.push(audioData);
-        playNextAudioChunk();
-        setSessionState("speaking");
+        // Only queue audio if we're not in listening mode (user hasn't interrupted)
+        // This prevents audio from restarting after we've interrupted the CURRENT response
+        if (sessionStateRef.current !== "listening") {
+          const audioData = pcm16Base64ToFloat32(event.audio);
+          audioQueueRef.current.push(audioData);
+          playNextAudioChunkRef.current?.();
+          setSessionState("speaking");
+        } else {
+          console.log("[Voice] Ignoring audio.delta - in listening mode");
+        }
         break;
 
       case "transcript.user":
+        console.log("[Voice] User transcript:", event.transcript);
         setTranscripts((prev) => [
           ...prev,
           {
@@ -99,26 +120,37 @@ export function useVoiceSession(
         break;
 
       case "transcript.assistant":
-        setTranscripts((prev) => {
-          // Update existing or add new
-          const existing = prev.find((t) => t.id === event.message_id);
-          if (existing) {
-            return prev.map((t) =>
-              t.id === event.message_id
-                ? { ...t, content: event.transcript }
-                : t
-            );
+        if (event.type === "transcript.assistant") {
+          console.log("[Voice] Assistant transcript:", event.transcript, "is_final:", event.is_final);
+
+          // Only add transcripts when they're final (have a message_id)
+          // This prevents duplicates from is_final:false events
+          if (!event.message_id) {
+            console.log("[Voice] Skipping non-final transcript");
+            break;
           }
-          return [
-            ...prev,
-            {
-              id: event.message_id,
-              role: "assistant",
-              content: event.transcript,
-              timestamp: new Date(),
-            },
-          ];
-        });
+
+          setTranscripts((prev) => {
+            // Update existing or add new
+            const existing = prev.find((t) => t.id === event.message_id);
+            if (existing) {
+              return prev.map((t) =>
+                t.id === event.message_id
+                  ? { ...t, content: event.transcript }
+                  : t
+              );
+            }
+            return [
+              ...prev,
+              {
+                id: event.message_id,
+                role: "assistant",
+                content: event.transcript,
+                timestamp: new Date(),
+              },
+            ];
+          });
+        }
         break;
 
       case "tool_call.start":
@@ -130,40 +162,65 @@ export function useVoiceSession(
         break;
 
       case "response.end":
-        setSessionState("idle");
+        console.log("[Voice] Response end");
+        // Don't change state here - playback loop or interrupt handler
+        // will have already set the correct state (listening or idle)
         break;
 
       case "session.end":
+        console.log("[Voice] Session end received");
         setConnectionState("disconnected");
         setSessionState("idle");
         break;
 
       case "error":
+        console.error("[Voice] Error event:", event.error, event);
         setError(event.error);
-        setConnectionState("error");
+        // Only disconnect if error is not recoverable
+        if (event.type === "error" && !event.recoverable) {
+          console.log("[Voice] Non-recoverable error - disconnecting");
+          setConnectionState("error");
+        } else {
+          console.log("[Voice] Recoverable error - staying connected");
+        }
         break;
     }
-  }, []);
+  }, [setSessionState]);
 
   // Stop current audio playback (for barge-in)
   const stopPlayback = useCallback(() => {
-    // Stop current playing source
-    if (currentSourceRef.current) {
+    console.log("[Voice] stopPlayback called");
+    // Set flag first to stop the playback loop
+    isPlayingRef.current = false;
+
+    // Stop current playing source (this will trigger onended and resolve the promise)
+    const source = currentSourceRef.current;
+    if (source) {
       try {
-        currentSourceRef.current.stop();
-      } catch {
-        // Already stopped
+        // Stop will trigger the onended event, resolving the play promise
+        source.stop();
+      } catch (e) {
+        // Source might not be started yet or already stopped
+        // Manually trigger onended to ensure promise resolves
+        if (source.onended) {
+          source.onended(new Event('ended') as any);
+        }
       }
       currentSourceRef.current = null;
     }
+
     // Clear the queue
+    const queueLength = audioQueueRef.current.length;
+    if (queueLength > 0) {
+      console.log(`[Voice] Cleared ${queueLength} audio chunks from queue`);
+    }
     audioQueueRef.current = [];
-    isPlayingRef.current = false;
     setOutputLevel(0);
   }, []);
 
   // Play audio smoothly by buffering chunks and scheduling them
   const playNextAudioChunk = useCallback(async () => {
+    // Don't start new playback if already playing
     if (isPlayingRef.current) {
       return;
     }
@@ -172,7 +229,7 @@ export function useVoiceSession(
     const MIN_BUFFER_CHUNKS = 3;
     if (audioQueueRef.current.length < MIN_BUFFER_CHUNKS) {
       // Check again soon
-      setTimeout(() => playNextAudioChunk(), 50);
+      setTimeout(() => playNextAudioChunkRef.current?.(), 50);
       return;
     }
 
@@ -218,11 +275,16 @@ export function useVoiceSession(
     const playLoop = async () => {
       while (isPlayingRef.current) {
         const merged = mergeChunks();
-        
+
         if (!merged || merged.length === 0) {
           // Wait for more audio or finish
           await new Promise((r) => setTimeout(r, 100));
-          
+
+          // Check if we were stopped while waiting
+          if (!isPlayingRef.current) {
+            break;
+          }
+
           // If still no audio after waiting, we're done
           if (audioQueueRef.current.length === 0) {
             break;
@@ -238,13 +300,21 @@ export function useVoiceSession(
         currentSourceRef.current = source;
         source.connect(analyser);
 
-        await new Promise<void>((resolve) => {
+        // Play this chunk and wait for it to finish
+        const playPromise = new Promise<void>((resolve) => {
           source.onended = () => {
             currentSourceRef.current = null;
             resolve();
           };
           source.start();
         });
+
+        await playPromise;
+
+        // Check if we should continue after this chunk
+        if (!isPlayingRef.current) {
+          break;
+        }
       }
     };
 
@@ -252,11 +322,13 @@ export function useVoiceSession(
 
     clearInterval(levelInterval);
     setOutputLevel(0);
-    isPlayingRef.current = false;
-    
-    if (sessionStateRef.current === "speaking") {
+
+    // Only change state if we're still supposed to be playing
+    // (not if we were interrupted via stopPlayback)
+    if (isPlayingRef.current && sessionStateRef.current === "speaking") {
       setSessionState("listening");
     }
+    isPlayingRef.current = false;
   }, [setSessionState]);
 
   // Connect to WebSocket
@@ -276,25 +348,6 @@ export function useVoiceSession(
       setConnectionState("error");
     }
   }, [config, connectionState, handleServerEvent]);
-
-  // Disconnect from WebSocket
-  const disconnect = useCallback(() => {
-    // Stop listening first
-    stopListeningInternal();
-
-    // Close WebSocket
-    wsClientRef.current?.disconnect();
-    wsClientRef.current = null;
-
-    // Clear playback
-    audioQueueRef.current = [];
-    playbackContextRef.current?.close();
-    playbackContextRef.current = null;
-
-    setConnectionState("disconnected");
-    setSessionState("idle");
-    setSessionId(null);
-  }, []);
 
   // Internal stop listening function
   const stopListeningInternal = useCallback(() => {
@@ -325,6 +378,27 @@ export function useVoiceSession(
     analyserRef.current = null;
     setInputLevel(0);
   }, []);
+
+  // Disconnect from WebSocket
+  const disconnect = useCallback(() => {
+    // Stop listening first
+    stopListeningInternal();
+
+    // Stop any ongoing playback
+    stopPlayback();
+
+    // Close WebSocket
+    wsClientRef.current?.disconnect();
+    wsClientRef.current = null;
+
+    // Clear playback context
+    playbackContextRef.current?.close();
+    playbackContextRef.current = null;
+
+    setConnectionState("disconnected");
+    setSessionState("idle");
+    setSessionId(null);
+  }, [stopListeningInternal, stopPlayback, setSessionState]);
 
   // Start listening (microphone capture)
   const startListening = useCallback(async () => {
@@ -381,9 +455,13 @@ export function useVoiceSession(
 
           // Auto barge-in: if user speaks while AI is speaking, interrupt playback
           if (isSpeaking && sessionStateRef.current === "speaking") {
+            console.log("[Voice] Auto barge-in detected - interrupting");
+            // Stop playback first (clears queue and stops audio)
             stopPlayback();
-            wsClientRef.current?.interrupt();
+            // Set state to listening before sending interrupt
             setSessionState("listening");
+            // Notify server about the interrupt
+            wsClientRef.current?.interrupt();
           }
 
           // Resample if necessary
@@ -431,10 +509,16 @@ export function useVoiceSession(
 
   // Interrupt assistant speech (used internally for barge-in)
   const interrupt = useCallback(() => {
+    console.log("[Voice] Interrupt called - stopping playback and notifying server");
     stopPlayback();
-    wsClientRef.current?.interrupt();
     setSessionState("listening");
+    wsClientRef.current?.interrupt();
   }, [stopPlayback, setSessionState]);
+
+  // Keep ref in sync with callback
+  useEffect(() => {
+    playNextAudioChunkRef.current = playNextAudioChunk;
+  }, [playNextAudioChunk]);
 
   // Cleanup on unmount
   useEffect(() => {

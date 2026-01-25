@@ -36,12 +36,14 @@ export interface TranscriptUserEvent {
   type: "transcript.user";
   transcript: string;
   message_id: string;
+  is_final: boolean;
 }
 
 export interface TranscriptAssistantEvent {
   type: "transcript.assistant";
   transcript: string;
-  message_id: string;
+  message_id: string | null;
+  is_final: boolean;
 }
 
 export interface ToolCallStartEvent {
@@ -55,6 +57,11 @@ export interface ToolCallEndEvent {
   tool_name: string;
   call_id: string;
   result?: unknown;
+}
+
+export interface ResponseStartEvent {
+  type: "response.start";
+  response_id: string;
 }
 
 export interface ResponseEndEvent {
@@ -72,10 +79,12 @@ export interface ErrorEvent {
   type: "error";
   error: string;
   code?: string;
+  recoverable?: boolean;
 }
 
 export type ServerEvent =
   | SessionCreatedEvent
+  | ResponseStartEvent
   | AudioDeltaEvent
   | TranscriptUserEvent
   | TranscriptAssistantEvent
@@ -107,6 +116,7 @@ export interface TranscriptMessage {
 
 export interface VoiceSessionConfig {
   subjectId?: string;
+  feature?: string;
   voice?: "alloy" | "echo" | "fable" | "onyx" | "nova" | "shimmer";
 }
 
