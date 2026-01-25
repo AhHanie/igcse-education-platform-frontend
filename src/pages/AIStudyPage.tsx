@@ -1,7 +1,8 @@
-import React from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useSearchParams } from "react-router";
 import "@/assets/css/studypage.css";
 import ChatInput from "@/features/chat/components/ChatInput";
+import type { VoiceState } from "@/features/chat/components/ChatInput";
 import Message from "@/features/chat/components/Message";
 import type { MessageData } from "@/features/chat/components/Message";
 import {
@@ -16,6 +17,7 @@ import {
   sendChatMessage,
 } from "@/features/chat/api/chatApi";
 import type { StreamEventTypes } from "@/features/chat/api/chatApi";
+import { useVoiceSession } from "@/features/voice";
 
 type ModeType = "explain" | "solve" | "quiz" | "simplify" | "summarize";
 
@@ -48,6 +50,61 @@ const AIStudyPage: React.FC = () => {
   const [isStreaming, setIsStreaming] = React.useState(false);
   const [_, setCurrentStreamingMessageId] = React.useState<string | null>(null);
   const chatAreaRef = React.useRef<HTMLDivElement>(null);
+  const hasAutoStartedRef = useRef(false);
+
+  // Voice session
+  const {
+    connectionState: voiceConnectionState,
+    sessionState: voiceSessionState,
+    transcripts,
+    connect: voiceConnect,
+    disconnect: voiceDisconnect,
+    startListening,
+    stopListening,
+  } = useVoiceSession({
+    voice: "shimmer",
+    feature: currentSubject?.subjectName === "All" ? toolId : `${toolId}_rag`,
+    subjectId: undefined, // TODO: Map subject name to UUID when subject context is needed
+  });
+
+  // Map connection state to VoiceState type
+  const voiceState: VoiceState =
+    voiceConnectionState === "connected"
+      ? "connected"
+      : voiceConnectionState === "connecting"
+        ? "connecting"
+        : "disconnected";
+
+  // Add voice transcripts to messages
+  useEffect(() => {
+    if (transcripts.length === 0) return;
+
+    // Convert transcripts to messages
+    const voiceMessages: MessageData[] = transcripts.map((t) => ({
+      id: t.id,
+      sender_type: t.role === "user" ? "user" : "assistant",
+      content: t.content,
+      timestamp: t.timestamp,
+      isVoice: true,
+    }));
+
+    // Merge with existing non-voice messages
+    setMessages((prev) => {
+      const nonVoiceMessages = prev.filter((m) => !m.isVoice);
+      return [...nonVoiceMessages, ...voiceMessages];
+    });
+  }, [transcripts]);
+
+  // Auto-start listening when voice connects
+  useEffect(() => {
+    if (voiceConnectionState === "connected" && !hasAutoStartedRef.current) {
+      hasAutoStartedRef.current = true;
+      startListening();
+    }
+    if (voiceConnectionState === "disconnected") {
+      hasAutoStartedRef.current = false;
+    }
+  }, [voiceConnectionState, startListening]);
 
   const askQuestion = (question: string) => {
     handleSend(question, "explain");
@@ -173,6 +230,17 @@ const AIStudyPage: React.FC = () => {
     }
   };
 
+  const handleStartCall = useCallback(async () => {
+    await voiceConnect();
+  }, [voiceConnect]);
+
+  const handleEndCall = useCallback(() => {
+    stopListening();
+    voiceDisconnect();
+  }, [stopListening, voiceDisconnect]);
+
+  const isInCall = voiceState === "connected";
+
   return (
     <div className="h-full flex flex-col">
       <div className="header-right flex-shrink-0">
@@ -206,7 +274,7 @@ const AIStudyPage: React.FC = () => {
           className="flex-1 overflow-y-auto px-4 py-6"
           style={{ scrollBehavior: "smooth" }}
         >
-          {messages.length === 0 ? (
+          {messages.length === 0 && !isInCall ? (
             <div className="welcome-message" id="welcomeMessage">
               <div className="welcome-icon">🤖</div>
 
@@ -258,6 +326,14 @@ const AIStudyPage: React.FC = () => {
                 </button>
               </div>
             </div>
+          ) : messages.length === 0 && isInCall ? (
+            <div className="welcome-message" id="welcomeMessage">
+              <div className="welcome-icon">🎙️</div>
+              <h2>Voice Mode Active</h2>
+              <p>
+                Just speak naturally and I'll respond. Start talking to interrupt me anytime.
+              </p>
+            </div>
           ) : (
             <div className="space-y-2">
               {messages.map((msg) => (
@@ -267,7 +343,14 @@ const AIStudyPage: React.FC = () => {
           )}
         </div>
         <div className="flex-shrink-0">
-          <ChatInput onSend={handleSend} disabled={isStreaming} />
+          <ChatInput
+            onSend={handleSend}
+            disabled={isStreaming || isInCall}
+            voiceState={voiceState}
+            voiceSessionState={voiceSessionState}
+            onStartCall={handleStartCall}
+            onEndCall={handleEndCall}
+          />
         </div>
       </div>
     </div>

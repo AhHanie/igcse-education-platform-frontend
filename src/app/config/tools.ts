@@ -18,6 +18,7 @@ import {
   AlertCircle,
   Clock,
   MessageCircle,
+  Mic,
 } from "lucide-react";
 
 export interface Tool {
@@ -40,6 +41,17 @@ export const tools: Tool[] = [
     icon: MessageCircle,
     color: "bg-sky-100 text-sky-700",
     tags: ["All Subjects", "24/7 Help"],
+    category: "all",
+    url: "/chat",
+  },
+  {
+    id: "hands-free",
+    name: "Hands Free",
+    description:
+      "Talk directly with your AI tutor using voice — no typing required",
+    icon: Mic,
+    color: "bg-gradient-to-br from-violet-100 to-fuchsia-100 text-violet-700",
+    tags: ["Voice", "Real-time", "Conversation"],
     category: "all",
     url: "/chat",
   },

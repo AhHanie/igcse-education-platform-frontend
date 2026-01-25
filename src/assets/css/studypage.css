@@ -199,7 +199,8 @@
     }
     .input-wrapper {
       display: flex;
-      align-items: flex-end;
+      align-items: center;
+      gap: 8px;
     }
     .input-wrapper2 {
       display: flex;
