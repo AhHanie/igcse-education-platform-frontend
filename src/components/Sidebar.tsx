@@ -1,24 +1,35 @@
-import "../assets/css/Sidebar.css";
-
 import {
-  ChevronLeft,
-  ChevronRight,
   Users,
   LogOut,
   BookOpen,
   FileText,
   Sparkles,
+  ChevronUp,
+  PanelLeftClose,
   type LucideIcon,
 } from "lucide-react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useAppStore } from "@app/store/useAppStore";
+import { logout } from "@app/api/auth";
+import {
+  Sidebar,
+  SidebarContent,
+  SidebarFooter,
+  SidebarGroup,
+  SidebarGroupContent,
+  SidebarHeader,
+  SidebarMenu,
+  SidebarMenuButton,
+  SidebarMenuItem,
+  useSidebar,
+} from "@/components/ui/sidebar";
 import {
   Dropdown,
   DropdownTrigger,
   DropdownContent,
   DropdownItem,
 } from "@components/ui/dropdown";
-import { logout } from "@app/api/auth";
+import { Button } from "@/components/ui/button";
 
 // Navigation item type
 interface NavItem {
@@ -70,14 +81,21 @@ const getInitials = (displayName: string | null | undefined): string => {
   return (names[0][0] + names[names.length - 1][0]).toUpperCase();
 };
 
-const Sidebar = (props: { collapsed: boolean; onToggle: () => void }) => {
-  const { collapsed, onToggle } = props;
+const AppSidebar = () => {
   const user = useAppStore((state) => state.user);
   const navigate = useNavigate();
   const location = useLocation();
+  const { state, toggleSidebar, setOpen } = useSidebar();
 
   const userDisplayName = user?.display_name || user?.username || "User";
   const userInitials = getInitials(user?.display_name);
+  const isCollapsed = state === "collapsed";
+
+  const handleLogoClick = () => {
+    if (isCollapsed) {
+      setOpen(true);
+    }
+  };
 
   // Get all nav items for user's roles
   const navItems: NavItem[] = [];
@@ -101,66 +119,100 @@ const Sidebar = (props: { collapsed: boolean; onToggle: () => void }) => {
   };
 
   return (
-    <div className={`sidebar font-primary ${collapsed ? "collapsed" : ""}`}>
-      <button
-        className="collapse-toggle"
-        onClick={onToggle}
-        aria-label={collapsed ? "Expand sidebar" : "Collapse sidebar"}
-      >
-        {collapsed ? <ChevronRight size={20} /> : <ChevronLeft size={20} />}
-      </button>
-
-      <div className="logo">
-        <div className="logo-icon">✨</div>
-        {!collapsed && (
-          <div>
-            <h1>StudyAI</h1>
-            <span>Student Companion</span>
-          </div>
-        )}
-      </div>
-
-      <ul className="nav">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = location.pathname === item.route;
-
-          return (
-            <li
-              key={item.route}
-              className={`nav-item ${isActive ? "active" : ""}`}
-              onClick={() => navigate(item.route)}
-              title={item.name}
-            >
-              <span className="nav-icon">
-                <Icon size={20} />
+    <Sidebar collapsible="icon">
+      <SidebarHeader className="border-b-0">
+        <div className="flex items-center justify-between w-full">
+          <SidebarMenuButton
+            size="lg"
+            className={isCollapsed ? "cursor-pointer flex-1" : "hover:bg-transparent cursor-default flex-1"}
+            onClick={handleLogoClick}
+          >
+            <div className="flex aspect-square size-10 items-center justify-center rounded-xl bg-gradient-to-br from-primary to-primary/80 text-primary-foreground text-lg">
+              ✨
+            </div>
+            <div className="flex flex-col gap-0.5 leading-none">
+              <span className="font-bold text-base">StudyAI</span>
+              <span className="text-xs text-muted-foreground">
+                Companion
               </span>
-              {!collapsed && <span className="nav-text">{item.name}</span>}
-            </li>
-          );
-        })}
-      </ul>
+            </div>
+          </SidebarMenuButton>
+          <Button
+            variant="ghost"
+            size="icon"
+            className="h-8 w-8 shrink-0 group-data-[collapsible=icon]:hidden"
+            onClick={toggleSidebar}
+            aria-label="Close sidebar"
+          >
+            <PanelLeftClose className="h-4 w-4" />
+          </Button>
+        </div>
+      </SidebarHeader>
 
-      <Dropdown>
-        <DropdownTrigger asChild>
-          <div className="user-card">
-            <div className="avatar">{userInitials}</div>
-            {!collapsed && (
-              <div>
-                <h4>{userDisplayName}</h4>
-              </div>
-            )}
-          </div>
-        </DropdownTrigger>
-        <DropdownContent align="end" side="top">
-          <DropdownItem onClick={handleLogout}>
-            <LogOut />
-            Logout
-          </DropdownItem>
-        </DropdownContent>
-      </Dropdown>
-    </div>
+      <SidebarContent>
+        <SidebarGroup>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {navItems.map((item) => {
+                const Icon = item.icon;
+                const isActive = location.pathname === item.route;
+
+                return (
+                  <SidebarMenuItem key={item.route}>
+                    <SidebarMenuButton
+                      isActive={isActive}
+                      onClick={() => navigate(item.route)}
+                      tooltip={item.name}
+                    >
+                      <Icon />
+                      <span>{item.name}</span>
+                    </SidebarMenuButton>
+                  </SidebarMenuItem>
+                );
+              })}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
+      </SidebarContent>
+
+      <SidebarFooter>
+        <SidebarMenu>
+          <SidebarMenuItem>
+            <Dropdown>
+              <DropdownTrigger asChild>
+                <SidebarMenuButton
+                  size="lg"
+                  className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
+                >
+                  <div className="flex aspect-square size-8 items-center justify-center rounded-lg bg-gradient-to-br from-amber-500 to-orange-600 text-white font-bold text-sm">
+                    {userInitials}
+                  </div>
+                  <div className="grid flex-1 text-left text-sm leading-tight">
+                    <span className="truncate font-semibold">
+                      {userDisplayName}
+                    </span>
+                  </div>
+                  <ChevronUp className="ml-auto size-4" />
+                </SidebarMenuButton>
+              </DropdownTrigger>
+              <DropdownContent
+                className="w-[--radix-popper-anchor-width] min-w-56"
+                side={isCollapsed ? "right" : "top"}
+                align={isCollapsed ? "end" : "end"}
+                sideOffset={4}
+              >
+                <DropdownItem onClick={handleLogout}>
+                  <LogOut />
+                  Logout
+                </DropdownItem>
+              </DropdownContent>
+            </Dropdown>
+          </SidebarMenuItem>
+        </SidebarMenu>
+      </SidebarFooter>
+
+    </Sidebar>
   );
 };
 
-export default Sidebar;
+export default AppSidebar;
