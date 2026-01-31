@@ -1,3 +1,6 @@
+/* Highlight.js base styles */
+@import 'highlight.js/styles/vs2015.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

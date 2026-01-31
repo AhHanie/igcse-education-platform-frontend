@@ -5,13 +5,7 @@ import ChatInput from "@/features/chat/components/ChatInput";
 import type { VoiceState } from "@/features/chat/components/ChatInput";
 import Message from "@/features/chat/components/Message";
 import type { MessageData } from "@/features/chat/components/Message";
-import {
-  Dropdown,
-  DropdownTrigger,
-  DropdownContent,
-  DropdownItem,
-} from "@/components/ui/dropdown";
-import { ChevronDown } from "lucide-react";
+import { BookOpen, Lightbulb, Calculator, FlaskConical, Mic } from "lucide-react";
 import {
   createChatSession,
   sendChatMessage,
@@ -28,7 +22,7 @@ export interface DropdownOption {
 }
 
 const subjectList: DropdownOption[] = [
-  { id: 1, subjectName: "All", icon: "✨" },
+  { id: 1, subjectName: "All Subjects", icon: "✨" },
   { id: 2, subjectName: "Biology", icon: "🧬" },
   { id: 3, subjectName: "Chemistry", icon: "⚗️" },
   { id: 4, subjectName: "Physics", icon: "⚡" },
@@ -37,6 +31,29 @@ const subjectList: DropdownOption[] = [
   { id: 7, subjectName: "History", icon: "🏛️" },
   { id: 8, subjectName: "Geography", icon: "🌍" },
   { id: 9, subjectName: "Economics", icon: "📊" },
+];
+
+const quickActions = [
+  {
+    icon: Lightbulb,
+    label: "Explain photosynthesis",
+    prompt: "Explain photosynthesis step by step",
+  },
+  {
+    icon: Calculator,
+    label: "Quadratic formula",
+    prompt: "What is the quadratic formula and when do I use it?",
+  },
+  {
+    icon: FlaskConical,
+    label: "Newton's laws",
+    prompt: "Explain Newton's 3 laws of motion with examples",
+  },
+  {
+    icon: BookOpen,
+    label: "Balance equations",
+    prompt: "How do I balance chemical equations?",
+  },
 ];
 
 const AIStudyPage: React.FC = () => {
@@ -63,8 +80,8 @@ const AIStudyPage: React.FC = () => {
     stopListening,
   } = useVoiceSession({
     voice: "shimmer",
-    feature: currentSubject?.subjectName === "All" ? toolId : `${toolId}_rag`,
-    subjectId: undefined, // TODO: Map subject name to UUID when subject context is needed
+    feature: currentSubject?.subjectName === "All Subjects" ? toolId : `${toolId}_rag`,
+    subjectId: undefined,
   });
 
   // Map connection state to VoiceState type
@@ -79,7 +96,6 @@ const AIStudyPage: React.FC = () => {
   useEffect(() => {
     if (transcripts.length === 0) return;
 
-    // Convert transcripts to messages
     const voiceMessages: MessageData[] = transcripts.map((t) => ({
       id: t.id,
       sender_type: t.role === "user" ? "user" : "assistant",
@@ -88,7 +104,6 @@ const AIStudyPage: React.FC = () => {
       isVoice: true,
     }));
 
-    // Merge with existing non-voice messages
     setMessages((prev) => {
       const nonVoiceMessages = prev.filter((m) => !m.isVoice);
       return [...nonVoiceMessages, ...voiceMessages];
@@ -121,10 +136,9 @@ const AIStudyPage: React.FC = () => {
     }
   }, [messages]);
 
-  const handleSend = async (message: string, mode: ModeType) => {
+  const handleSend = async (message: string, _mode: ModeType) => {
     if (!message.trim() || isStreaming) return;
 
-    // Add user message to chat
     const userMessage: MessageData = {
       id: `user-${Date.now()}`,
       sender_type: "user",
@@ -135,7 +149,6 @@ const AIStudyPage: React.FC = () => {
     setMessages((prev) => [...prev, userMessage]);
     setIsStreaming(true);
 
-    // Create placeholder for assistant message
     const assistantMessageId = `assistant-${Date.now()}`;
     const assistantMessage: MessageData = {
       id: assistantMessageId,
@@ -197,19 +210,17 @@ const AIStudyPage: React.FC = () => {
       };
 
       if (!sessionId) {
-        // Create new session with first message
         await createChatSession(
           {
             subject_id: null,
             topic_id: null,
             feature:
-              currentSubject?.subjectName === "All" ? toolId : `${toolId}_rag`,
+              currentSubject?.subjectName === "All Subjects" ? toolId : `${toolId}_rag`,
             message,
           },
           handleStreamEvent
         );
       } else {
-        // Send message to existing session
         await sendChatMessage(sessionId, { message }, handleStreamEvent);
       }
     } catch (error) {
@@ -242,115 +253,87 @@ const AIStudyPage: React.FC = () => {
   const isInCall = voiceState === "connected";
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="header-right flex-shrink-0">
-        <div className="w-[165px]">
-          <Dropdown>
-            <DropdownTrigger className="flex items-center gap-2 w-full px-3 py-2 text-sm border rounded-md bg-background hover:bg-accent focus:outline-none focus:ring-2 focus:ring-ring">
-              <span className="text-base">{currentSubject?.icon}</span>
-              <span className="flex-1 text-left">
-                {currentSubject?.subjectName}
-              </span>
-              <ChevronDown className="h-4 w-4 opacity-50" />
-            </DropdownTrigger>
-            <DropdownContent align="start" className="w-[165px]">
-              {subjectList.map((subject) => (
-                <DropdownItem
-                  key={subject.id}
-                  onClick={() => handleSelect(subject)}
-                  className="flex items-center gap-2"
-                >
-                  <span className="text-base">{subject.icon}</span>
-                  <span>{subject.subjectName}</span>
-                </DropdownItem>
-              ))}
-            </DropdownContent>
-          </Dropdown>
-        </div>
-      </div>
-      <div className="chat-area flex-1 flex flex-col" id="chatArea">
+    <div className="ai-study-container h-full flex flex-col bg-background">
+      {/* Chat area */}
+      <div className="flex-1 flex flex-col min-h-0 relative">
         <div
           ref={chatAreaRef}
-          className="flex-1 overflow-y-auto px-4 py-6"
+          className="flex-1 overflow-y-auto pb-24"
           style={{ scrollBehavior: "smooth" }}
         >
           {messages.length === 0 && !isInCall ? (
-            <div className="welcome-message" id="welcomeMessage">
-              <div className="welcome-icon">🤖</div>
+            /* Welcome screen */
+            <div className="h-full flex items-center justify-center px-4 py-12">
+              <div className="max-w-xl mx-auto text-center">
+                {/* Title */}
+                <h1 className="text-2xl md:text-3xl font-semibold text-foreground mb-3 tracking-tight">
+                  How can I help you today?
+                </h1>
 
-              <h2>Hi! I'm your IGCSE Study Companion</h2>
+                {/* Subtitle */}
+                <p className="text-muted-foreground text-base mb-10 max-w-md mx-auto leading-relaxed">
+                  I'm your IGCSE study companion. Ask me anything about your subjects.
+                </p>
 
-              <p>
-                Ask me anything about your IGCSE subjects. I'll explain
-                concepts, solve problems step-by-step, and help you prepare for
-                exams.
-              </p>
-
-              <div className="quick-actions">
-                <button
-                  className="quick-action"
-                  onClick={() =>
-                    askQuestion("Explain photosynthesis step by step")
-                  }
-                >
-                  🌱 Explain photosynthesis
-                </button>
-                <button
-                  className="quick-action"
-                  onClick={() =>
-                    askQuestion(
-                      "What is the quadratic formula and when do I use it?"
-                    )
-                  }
-                >
-                  📐 Quadratic formula
-                </button>
-                <button
-                  className="quick-action"
-                  onClick={() =>
-                    askQuestion(
-                      "Explain Newton's 3 laws of motion with examples"
-                    )
-                  }
-                >
-                  ⚡ Newton's laws
-                </button>
-
-                <button
-                  className="quick-action"
-                  onClick={() =>
-                    askQuestion("How do I balance chemical equations?")
-                  }
-                >
-                  ⚗️ Balance equations
-                </button>
+                {/* Quick actions */}
+                <div className="grid grid-cols-2 gap-2.5 max-w-lg mx-auto">
+                  {quickActions.map((action, index) => (
+                    <button
+                      key={index}
+                      onClick={() => askQuestion(action.prompt)}
+                      className="flex items-center gap-2.5 p-3 rounded-xl border border-border/50 bg-muted/30 hover:bg-muted/60 text-left transition-all group"
+                    >
+                      <div className="p-1.5 rounded-lg bg-muted/80 text-muted-foreground group-hover:text-foreground transition-colors">
+                        <action.icon className="w-4 h-4" />
+                      </div>
+                      <span className="text-sm font-medium text-foreground/80 group-hover:text-foreground transition-colors">
+                        {action.label}
+                      </span>
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
           ) : messages.length === 0 && isInCall ? (
-            <div className="welcome-message" id="welcomeMessage">
-              <div className="welcome-icon">🎙️</div>
-              <h2>Voice Mode Active</h2>
-              <p>
-                Just speak naturally and I'll respond. Start talking to interrupt me anytime.
-              </p>
+            /* Voice mode active screen */
+            <div className="h-full flex items-center justify-center px-4">
+              <div className="text-center">
+                <div className="w-20 h-20 mx-auto rounded-full bg-gradient-to-br from-emerald-400 to-cyan-500 flex items-center justify-center mb-5 shadow-lg shadow-emerald-500/20 animate-pulse">
+                  <Mic className="w-8 h-8 text-white" />
+                </div>
+                <h2 className="text-xl font-semibold text-foreground mb-2">Voice Mode Active</h2>
+                <p className="text-muted-foreground text-sm max-w-xs mx-auto">
+                  Just speak naturally and I'll respond. Start talking to interrupt me anytime.
+                </p>
+              </div>
             </div>
           ) : (
-            <div className="space-y-2">
-              {messages.map((msg) => (
-                <Message key={msg.id} message={msg} />
-              ))}
+            /* Messages */
+            <div className="min-h-full py-4 flex flex-col items-center">
+              <div className="w-full max-w-3xl">
+                {messages.map((msg) => (
+                  <Message key={msg.id} message={msg} />
+                ))}
+              </div>
             </div>
           )}
         </div>
-        <div className="flex-shrink-0">
-          <ChatInput
-            onSend={handleSend}
-            disabled={isStreaming || isInCall}
-            voiceState={voiceState}
-            voiceSessionState={voiceSessionState}
-            onStartCall={handleStartCall}
-            onEndCall={handleEndCall}
-          />
+
+        {/* Sticky Input area */}
+        <div className="sticky bottom-0 z-20 bg-background pt-2 pb-4">
+          <div className="max-w-3xl mx-auto px-4 md:px-6">
+            <ChatInput
+              onSend={handleSend}
+              disabled={isStreaming || isInCall}
+              voiceState={voiceState}
+              voiceSessionState={voiceSessionState}
+              onStartCall={handleStartCall}
+              onEndCall={handleEndCall}
+              currentSubject={currentSubject}
+              subjectList={subjectList}
+              onSubjectSelect={handleSelect}
+            />
+          </div>
         </div>
       </div>
     </div>
