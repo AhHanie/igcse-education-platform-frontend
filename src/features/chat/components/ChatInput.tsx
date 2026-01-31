@@ -211,8 +211,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
             </Dropdown>
           )}
 
-          {/* Audio wave icon - starts call */}
-          {!message.trim() && (
+          {/* Audio wave icon - starts call (always visible when not in call) */}
+          {!isInCall && (
             <button
               type="button"
               onClick={handleCallToggle}

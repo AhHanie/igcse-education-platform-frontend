@@ -139,17 +139,18 @@ const AIStudyPage: React.FC = () => {
   const handleSend = async (message: string, _mode: ModeType) => {
     if (!message.trim() || isStreaming) return;
 
+    // Generate unique IDs with a small delay to ensure ordering
+    const baseTime = Date.now();
+    const userMessageId = `user-${baseTime}-${Math.random().toString(36).substr(2, 9)}`;
+    const assistantMessageId = `assistant-${baseTime + 1}-${Math.random().toString(36).substr(2, 9)}`;
+
     const userMessage: MessageData = {
-      id: `user-${Date.now()}`,
+      id: userMessageId,
       sender_type: "user",
       content: message,
       timestamp: new Date(),
     };
 
-    setMessages((prev) => [...prev, userMessage]);
-    setIsStreaming(true);
-
-    const assistantMessageId = `assistant-${Date.now()}`;
     const assistantMessage: MessageData = {
       id: assistantMessageId,
       sender_type: "assistant",
@@ -158,7 +159,9 @@ const AIStudyPage: React.FC = () => {
       isStreaming: true,
     };
 
-    setMessages((prev) => [...prev, assistantMessage]);
+    // Add both messages in a single update to ensure correct order
+    setMessages((prev) => [...prev, userMessage, assistantMessage]);
+    setIsStreaming(true);
     setCurrentStreamingMessageId(assistantMessageId);
 
     try {
@@ -311,9 +314,16 @@ const AIStudyPage: React.FC = () => {
             /* Messages */
             <div className="min-h-full py-4 flex flex-col items-center">
               <div className="w-full max-w-3xl">
-                {messages.map((msg) => (
-                  <Message key={msg.id} message={msg} />
-                ))}
+                {messages
+                  .sort((a, b) => {
+                    // Sort by timestamp to ensure correct order
+                    const timeA = a.timestamp?.getTime() || 0;
+                    const timeB = b.timestamp?.getTime() || 0;
+                    return timeA - timeB;
+                  })
+                  .map((msg) => (
+                    <Message key={msg.id} message={msg} />
+                  ))}
               </div>
             </div>
           )}
